@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Key master": {
+      "commandName": "Project"
+    },
+    "nanoCAD": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Program Files\\Nanosoft\\nanoCAD x64 25.0\\nCad.exe"
+    }
+  }
+}
