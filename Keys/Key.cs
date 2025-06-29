@@ -15,6 +15,8 @@ namespace Key_master.Keys
 
         private Point3d _point1, _point2;
 
+        public delegate void MoveGripDelegate(Point3d gripPoint, Vector3d offset);
+
 
         public double OriginPointX
         {
@@ -84,11 +86,40 @@ namespace Key_master.Keys
             _point1 = _point1.TransformBy(tfm);
             _point2 = _point2.TransformBy(tfm);
         }
+
+
+        public override bool GetGripPoints(GripPointsInfo info)
+        {
+            McSmartGrip<Key> grip1 = new McSmartGrip<Key>(_point1,(obj,grip,offset) => GripMove(obj, _point1,offset));
+            McSmartGrip<Key> grip2 = new McSmartGrip<Key>(_point2, (obj, grip, offset) => GripMove(obj, _point2, offset));
+
+            info.Grips.Add(grip1);
+            info.Grips.Add(grip2);
+
+            return true;
+        }
          
         public bool TryModify()
         {
             TryModify(0);
             return true;
+        }
+
+
+        private void GripMove(Key obj,Point3d gripPoint, Vector3d offset)
+        {
+            if (obj.TryModify())
+            {
+                if (gripPoint == _point1)
+                {
+                    _point1 += offset;
+                }
+                else if (gripPoint == _point2)
+                {
+                   _point2 += offset;
+                }
+                Invalidate();
+            }
         }
 
         public Key()
