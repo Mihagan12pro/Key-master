@@ -1,14 +1,21 @@
-﻿using Key_master.Services;
+﻿using Key_master.Keys;
+using Key_master.Services;
+using Multicad;
+using Multicad.DatabaseServices;
 using Multicad.Runtime;
+using System.Windows;
+using static Multicad.DatabaseServices.McEntity;
 
 namespace Key_master
 {
     internal static class Library
     {
-        [CommandMethod("TestMcCAD", CommandFlags.NoCheck | CommandFlags.NoPrefix)]
-        public static void TestMcCADCommands()
+        [CommandMethod("Create_key", CommandFlags.NoCheck | CommandFlags.NoPrefix)]
+        public static void CreateKeyCommand()
         {
-            DotNetConstantsService.DraftEditor.WriteMessage("Hello  Multicad!");
+            Key key = new Key();
+
+            key.DbEntity.AddToCurrentDocument();
         }
     }
 }
