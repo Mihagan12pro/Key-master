@@ -16,16 +16,44 @@ namespace Key_master.Keys
         private Point3d _point1, _point2;
 
 
+        public double OriginPointX
+        {
+            get { return _point1.X; }
+            set
+            {
+                if (!TryModify()) 
+                    return; 
+                _point1.X = value;
+            }
+        }
+
+       
+        public double OriginPointY
+        {
+            get { return _point1.Y; }
+            set
+            {
+                if (!TryModify()) 
+                    return; 
+                _point1.Y = value;
+            }
+        }
+
+
         public override void OnDraw(GeometryBuilder dc)
         {
             dc.Clear();
 
             dc.DrawPolyline
             (
-                new Point3d[]
+                new Point3d[] 
                 {
-                    _point1,_point2
-                }    
+                    _point1,
+                    new Point3d(_point1.X, _point2.Y, 0),
+                    _point2,
+                    new Point3d(_point2.X, _point1.Y, 0),
+                    _point1
+                }
             );
         }
 
@@ -48,10 +76,26 @@ namespace Key_master.Keys
         }
 
 
+        public override void OnTransform(Matrix3d tfm)
+        {
+            if (!TryModify())
+                return;
+
+            _point1 = _point1.TransformBy(tfm);
+            _point2 = _point2.TransformBy(tfm);
+        }
+         
+        public bool TryModify()
+        {
+            TryModify(0);
+            return true;
+        }
+
         public Key()
         {
-            _point1 = new Point3d(0, 0, 0);
-            _point2 = new Point3d(0, 0, 100);
+            _point1 = new Point3d(50, 50, 0);
+
+            _point2 = new Point3d(350, 150, 0);
         }
     }
 }
