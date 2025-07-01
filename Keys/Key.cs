@@ -1,62 +1,82 @@
 ﻿using Multicad;
 using Multicad.CustomObjectBase;
+using Multicad.DatabaseServices;
 using Multicad.Geometry;
 using Multicad.Runtime;
-using System.Configuration;
-using System.Runtime.CompilerServices;
+using Teigha.BoundaryRepresentation;
 
 namespace Key_master.Keys
 {
     [CustomEntity("1C925FA1-842B-49CD-924F-4ABF9717DB62", "Key", "Key Entity")]
-    internal class Key : McCustomBase, IMcSerializable
+    internal class Key : McCustomBase, IMcStreamSerializable
     {
         public double Length { get; set; }
 
         public double Width { get; set; }
 
-        private Point3d _point1, _point2, _centerOfKey;
-
-        private Point3d _topPoint, _bottomPoint;
-
-        private Point3d _rightPoint, _leftPoint;
-
-        public delegate void MoveGripDelegate(Point3d gripPoint, Vector3d offset);
+        private Point3d _point = new Point3d(50, 50, 0);
+        private Vector3d _vector;
 
 
-       
+        public Point3d Origin
+        {
+            get
+            {
+                return _point;
+            }
+            set
+            {
+                if (!TryModify()) 
+                    return;
+
+                _point = value;
+            }
+        }
+
+
         public override void OnDraw(GeometryBuilder dc)
         {
             dc.Clear();
 
-            dc.DrawPolyline
-            (
-                new Point3d[] 
-                {
-                    _point1,
-                    new Point3d(_point1.X, _point2.Y, 0),
-                    _point2,
-                    new Point3d(_point2.X, _point1.Y, 0),
-                    _point1
-                }
-            );
+            Point3d point2 = _point + _vector;
 
-            _centerOfKey = new Point3d(0.5 * (_point1.X + _point2.X), 0.5 * (_point1.Y + _point2.Y), 0.5 * (_point1.Z + _point2.Z));
+            dc.DrawPolyline(new Point3d[] { _point, new Point3d(_point.X, point2.Y, 0), point2, new Point3d(point2.X, _point.Y, 0), _point });
         }
 
-        public override hresult OnMcSerialization(McSerializationInfo info)
-        {
-            info.Add("point1", _point1);
-            info.Add("point2", _point2);
 
-            return hresult.s_Ok;
-        }
-
-        public override hresult OnMcDeserialization(McSerializationInfo info)
+        public override hresult PlaceObject(PlaceFlags lInsertType)
         {
-            if (!info.GetValue("point1",out _point1) || !info.GetValue("point2",out _point2))
+            InputJig jig = new InputJig();
+            jig.SetInputOptions(InputJig.InputReturnMode.Other);
+            jig.ForceInputNumbers = true;
+
+            InputJig.PropertyInpector.SetSource(this);
+            InputResult res = jig.GetPoint("Выберите первую точку:");
+
+            if (res.Result != InputResult.ResultCode.Normal)
+                return hresult.e_Fail;
+
+            _point = res.Point;
+
+            DbEntity.AddToCurrentDocument();
+          
+            jig.ExcludeObject(ID);
+           
+            jig.MouseMove = (s, a) => {
+                TryModify(); _vector = a.Point - _point; DbEntity.Update();
+                InputJig.PropertyInpector.UpdateProperties();
+            };
+
+            res = jig.GetPoint("Выберите вторую точку:");
+            if (res.Result != InputResult.ResultCode.Normal)
             {
+                DbEntity.Erase();
                 return hresult.e_Fail;
             }
+
+            _vector = res.Point - _point;
+
+            InputJig.PropertyInpector.SetSource(null);
 
             return hresult.s_Ok;
         }
@@ -66,116 +86,59 @@ namespace Key_master.Keys
         {
             if (!TryModify())
                 return;
+            
+            _point = _point.TransformBy(tfm);
+        }
 
-            _point1 = _point1.TransformBy(tfm);
-            _point2 = _point2.TransformBy(tfm);
 
-            _centerOfKey = _centerOfKey.TransformBy(tfm);
+        public override hresult write(McStream S)
+        {
+            S.PutVersion(1, 0);
 
-            _topPoint = _topPoint.TransformBy(tfm);
-            _bottomPoint = _bottomPoint.TransformBy(tfm);
+            S.PutPoint(_point);
+            S.PutVector(_vector);
 
-            _rightPoint = _rightPoint.TransformBy(tfm);
-            _leftPoint = _leftPoint.TransformBy(tfm);
+            S.WriteVersionBlockEnd();
+
+            return hresult.s_Ok;
+        }
+
+
+        public override hresult read(McStream S)
+        {
+            short major, minor;
+            if (!S.GetVersion(out major, out minor))
+                return hresult.e_MakeMeProxy;
+
+            if (major == 1)
+            {
+                if (!S.GetPoint(out _point))
+                    return hresult.e_Fail;
+                if (!S.GetVector(out _vector))
+                    return hresult.e_Fail;
+            }
+
+            if (!S.ReadVersionBlockEnd())
+                return hresult.e_Fail;
+            return hresult.s_Ok;
         }
 
 
         public override bool GetGripPoints(GripPointsInfo info)
         {
-            McSmartGrip<Key> centerGrip = new McSmartGrip<Key>(_centerOfKey, (obj,grip,offset) => CenterMove(obj,_centerOfKey,offset));
 
-            McSmartGrip<Key> scaleTop = new McSmartGrip<Key>(_topPoint,(obj,grip,offset) => ScaleWidth(obj,_topPoint,offset));
-            McSmartGrip<Key> scaleBottom = new McSmartGrip<Key>(_bottomPoint,(obj,grip,offset) => ScaleWidth(obj,_bottomPoint,offset));
-           
-            McSmartGrip<Key> scaleRight = new McSmartGrip<Key>(_rightPoint, (obj, grip, offset) => ScaleLength(obj, _rightPoint, offset));
-            McSmartGrip<Key> scaleLeft = new McSmartGrip<Key>(_leftPoint, (obj,grip,offset) => ScaleLength(obj,_leftPoint,offset));
-
-            info.AppendGrip(centerGrip);
-
-            info.AppendGrip(scaleTop);
-            info.AppendGrip(scaleBottom);
-
-            info.AppendGrip(scaleRight);
-            info.AppendGrip(scaleLeft);
-
-
+            info.AppendGrip(new McSmartGrip<Key>(_point, (obj, grip, offset) => { obj.TryModify(); obj._point += offset; }));
+            info.AppendGrip(new McSmartGrip<Key>(_point + _vector, (obj, grip, offset) => { obj.TryModify(); obj._vector += offset; }));
             return true;
         }
 
-        private void ScaleWidth(Key obj, Point3d gripPoint, Vector3d offset)
+
+        public override bool SupportMcStreamSerialization()
         {
-            if (obj.TryModify())
-            {
-                if (gripPoint == _topPoint)
-                {
-                    _topPoint = new Point3d(_topPoint.X, _topPoint.Y + offset.Y, 0);
-                    _point2 = new Point3d(_point2.X, _point2.Y + offset.Y, 0);
-
-                    _rightPoint = new Point3d(_point1.X, (_point1.Y + _point2.Y) / 2, 0);
-                    _leftPoint = new Point3d(_point2.X, (_point1.Y + _point2.Y) / 2, 0);
-                    _bottomPoint = new Point3d((_point1.X + _point2.X) / 2, _point1.Y, 0);
-                }
-                else if (gripPoint == _bottomPoint)
-                {
-                    _bottomPoint = new Point3d(_bottomPoint.X, _bottomPoint.Y + offset.Y, 0);
-                    _point1 = new Point3d(_point1.X, _point1.Y + offset.Y, 0);
-
-                    _rightPoint = new Point3d(_point1.X, (_point1.Y + _point2.Y) / 2, 0);
-                    _leftPoint = new Point3d(_point2.X, (_point1.Y + _point2.Y) / 2, 0);
-                    _topPoint = new Point3d((_point1.X + _point2.X) / 2, _point2.Y, 0);
-                }
-            }
-
-            Invalidate();
+            return true;
         }
 
 
-        private void ScaleLength(Key obj, Point3d gripPoint, Vector3d offset)
-        {
-            if (obj.TryModify())
-            {
-                if (gripPoint == _rightPoint)
-                {
-                    _rightPoint = new Point3d(_rightPoint.X + offset.X, _rightPoint.Y,0);
-                    _point1 = new Point3d(_point1.X + offset.X, _point1.Y, 0);
-
-                    _topPoint = new Point3d((_point1.X + _point2.X) / 2, _point2.Y, 0);
-                    _leftPoint = new Point3d(_point2.X, (_point1.Y + _point2.Y) / 2, 0);
-                    _bottomPoint = new Point3d((_point1.X + _point2.X) / 2, _point1.Y, 0);
-                }
-                else if (gripPoint == _leftPoint)
-                {
-                    _leftPoint = new Point3d(_leftPoint.X + offset.X, _leftPoint.Y,0);
-                    _point2 = new Point3d(_point2.X + offset.X, _point2.Y,0);
-
-                    _topPoint = new Point3d((_point1.X + _point2.X) / 2, _point2.Y, 0);
-                    _rightPoint = new Point3d(_point1.X, (_point1.Y + _point2.Y) / 2, 0);
-                    _bottomPoint = new Point3d((_point1.X + _point2.X) / 2, _point1.Y, 0);
-                }
-            }
-            Invalidate();
-        }
-        
-        private void CenterMove(Key obj, Point3d gripPoint, Vector3d offset)
-        {
-            if (obj.TryModify())
-            {
-               if (gripPoint == _centerOfKey)
-               {
-                    Vector3d vector = _centerOfKey.GetVectorTo(_centerOfKey + offset);
-
-
-                    Matrix3d matrixDisplacement = Matrix3d.Displacement(vector);
-
-
-                    obj.OnTransform(matrixDisplacement);
-                }
-            }
-
-            Invalidate();
-        }
-
-         
         public bool TryModify()
         {
             TryModify(0);
@@ -185,14 +148,7 @@ namespace Key_master.Keys
 
         public Key()
         {
-            _point1 = new Point3d(50, 50, 0);
-            _point2 = new Point3d(350, 150, 0);
-
-            _topPoint = new Point3d((_point1.X + _point2.X) / 2, _point2.Y,0);
-            _bottomPoint = new Point3d((_point1.X + _point2.X) / 2, _point1.Y, 0);
-
-            _rightPoint = new Point3d(_point1.X, (_point1.Y + _point2.Y) / 2, 0);
-            _leftPoint = new Point3d(_point2.X, (_point1.Y + _point2.Y) / 2, 0);
+         
         }
     }
 }

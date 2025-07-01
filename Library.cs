@@ -1,10 +1,5 @@
 ﻿using Key_master.Keys;
-using Key_master.Services;
-using Multicad;
-using Multicad.DatabaseServices;
 using Multicad.Runtime;
-using System.Windows;
-using static Multicad.DatabaseServices.McEntity;
 
 namespace Key_master
 {
@@ -15,7 +10,8 @@ namespace Key_master
         {
             Key key = new Key();
 
-            key.DbEntity.AddToCurrentDocument();
+            key.PlaceObject();
+           // key.DbEntity.AddToCurrentDocument();
         }
     }
 }
