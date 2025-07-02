@@ -3,7 +3,10 @@ using Multicad.CustomObjectBase;
 using Multicad.DatabaseServices;
 using Multicad.Geometry;
 using Multicad.Runtime;
-using Teigha.BoundaryRepresentation;
+using Multicad.Symbols.Specification;
+using System;
+using System.Windows;
+using System.Windows.Media;
 
 namespace Key_master.Keys
 {
@@ -14,8 +17,10 @@ namespace Key_master.Keys
 
         public double Width { get; set; }
 
-        private Point3d _point = new Point3d(50, 50, 0);
-        private Vector3d _vector;
+        private Point3d _point,_center;
+        private Vector3d _diagonal;
+
+        
 
 
         public Point3d Origin
@@ -38,7 +43,7 @@ namespace Key_master.Keys
         {
             dc.Clear();
 
-            Point3d point2 = _point + _vector;
+            Point3d point2 = _point + _diagonal;
 
             dc.DrawPolyline(new Point3d[] { _point, new Point3d(_point.X, point2.Y, 0), point2, new Point3d(point2.X, _point.Y, 0), _point });
         }
@@ -51,33 +56,35 @@ namespace Key_master.Keys
             jig.ForceInputNumbers = true;
 
             InputJig.PropertyInpector.SetSource(this);
-            InputResult res = jig.GetPoint("Выберите первую точку:");
 
-            if (res.Result != InputResult.ResultCode.Normal)
-                return hresult.e_Fail;
 
-            _point = res.Point;
-
-            DbEntity.AddToCurrentDocument();
-          
-            jig.ExcludeObject(ID);
-           
-            jig.MouseMove = (s, a) => {
-                TryModify(); _vector = a.Point - _point; DbEntity.Update();
-                InputJig.PropertyInpector.UpdateProperties();
-            };
-
-            res = jig.GetPoint("Выберите вторую точку:");
-            if (res.Result != InputResult.ResultCode.Normal)
+            jig.GetRealNumber("Длина шпоночного паза: ",out double length);
+            if (length == 0)
             {
-                DbEntity.Erase();
+                MessageBox.Show("Длина шпоночного паза не должна быть равно нулю!","Ошибка!",MessageBoxButton.OK,MessageBoxImage.Error);
                 return hresult.e_Fail;
             }
+            Length = Math.Abs(length);
 
-            _vector = res.Point - _point;
+            jig.GetRealNumber("Ширина шпоночного паза: ", out double width);
+            if (width == 0)
+            {
+                 MessageBox.Show("Ширина шпоночного паза не должна быть равно нулю!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+                 return hresult.e_Fail;
+            }
+            Width = Math.Abs(width);
 
-            InputJig.PropertyInpector.SetSource(null);
+            DbEntity.AddToCurrentDocument();
 
+            _center = jig.GetPoint("Куда вставить шпоночный паз: ").Point;
+
+            _point= new Point3d(_center.X + Length * 0.5, _center.Y + Width * 0.5, 0);
+            Point3d point2 = new Point3d(_center.X - Length * 0.5, _center.Y - Width * 0.5, 0);
+
+            _diagonal = new Vector3d(point2.X - _point.X,point2.Y - _point.Y,point2.Z - _point.Z);
+
+            DbEntity.Update();
+           
             return hresult.s_Ok;
         }
 
@@ -88,6 +95,10 @@ namespace Key_master.Keys
                 return;
             
             _point = _point.TransformBy(tfm);
+
+            _center = _center.TransformBy(tfm);
+
+            _diagonal = _diagonal.TransformBy(tfm);
         }
 
 
@@ -96,7 +107,8 @@ namespace Key_master.Keys
             S.PutVersion(1, 0);
 
             S.PutPoint(_point);
-            S.PutVector(_vector);
+            S.PutPoint(_center);
+            S.PutVector(_diagonal);
 
             S.WriteVersionBlockEnd();
 
@@ -114,7 +126,9 @@ namespace Key_master.Keys
             {
                 if (!S.GetPoint(out _point))
                     return hresult.e_Fail;
-                if (!S.GetVector(out _vector))
+                if (!S.GetVector(out _diagonal))
+                    return hresult.e_Fail;
+                if (!S.GetPoint(out _center))
                     return hresult.e_Fail;
             }
 
@@ -126,9 +140,45 @@ namespace Key_master.Keys
 
         public override bool GetGripPoints(GripPointsInfo info)
         {
+            info.AppendGrip
+                (
+                    new McSmartGrip<Key>
+                        (
+                            _center, 
+                            (obj, grip, offset) => {
+                                obj.TryModify();
+                                Vector3d vector = _center.GetVectorTo(_center + offset); 
 
-            info.AppendGrip(new McSmartGrip<Key>(_point, (obj, grip, offset) => { obj.TryModify(); obj._point += offset; }));
-            info.AppendGrip(new McSmartGrip<Key>(_point + _vector, (obj, grip, offset) => { obj.TryModify(); obj._vector += offset; }));
+
+                                Matrix3d matrixDisplacement = Matrix3d.Displacement(vector);
+
+
+                                obj.OnTransform(matrixDisplacement);
+
+                                Invalidate();
+                            })
+                );
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<Key>
+                        (
+                            _point,
+                            (obj,grip,offset) => { 
+                                obj.TryModify(); 
+                                obj._diagonal += offset; 
+                            }));
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<Key>
+                        (
+                            _point + _diagonal, 
+                            (obj, grip, offset) => { 
+                                obj.TryModify(); 
+                                obj._diagonal += offset; 
+                            }));
+
             return true;
         }
 
@@ -148,7 +198,7 @@ namespace Key_master.Keys
 
         public Key()
         {
-         
+            
         }
     }
 }

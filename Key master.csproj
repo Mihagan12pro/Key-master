@@ -11,10 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="hostdbmgd">
-      <HintPath>..\NC_SDK_RU_25.0.6785.4733.7843\include-x64\hostdbmgd.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="imapimgd">
       <HintPath>..\NC_SDK_RU_25.0.6785.4733.7843\include-x64\imapimgd.dll</HintPath>
 	  <Private>False</Private>
