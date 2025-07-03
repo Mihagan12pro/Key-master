@@ -17,7 +17,7 @@ namespace Key_master.Keys
         public Vector3d LengthVector { get; protected set; }
         public Vector3d DiagonalVector { get; protected set; }
 
-        private Point3d _originPoint, _center;
+        protected Point3d _originPoint, _center;
 
 
         public override void OnDraw(GeometryBuilder dc)
@@ -112,16 +112,32 @@ namespace Key_master.Keys
 
         public override bool GetGripPoints(GripPointsInfo info)
         {
-            //info.AppendGrip
-            //    (
-            //       new McSmartGrip<Key>
-            //       (
-            //           _center,
+            info.AppendGrip
+                (
+                   new McSmartGrip<Key>
+                   (
+                       _center,
 
-            //           (obj, grip, offset) => DisplaceTransform(obj, _center, offset)
-            //       )
+                       (obj, grip, offset) =>
+                       {
+                           if (obj.TryModify())
+                           {
+                               obj._center += offset;
 
-            //    );
+                               Matrix3d matrix3dDisplacement = Matrix3d.Displacement(offset);
+
+                               //obj._originPoint = _originPoint.TransformBy(matrix3dDisplacement);
+
+                               obj.DiagonalVector = obj.DiagonalVector.TransformBy(matrix3dDisplacement);
+                               obj.WidthVector = obj.WidthVector.TransformBy(matrix3dDisplacement);
+                               obj.LengthVector = obj.LengthVector.TransformBy(matrix3dDisplacement);
+
+                               obj._originPoint = obj._originPoint.TransformBy(matrix3dDisplacement); 
+                           }
+                       }
+                   )
+
+                );
 
 
             //info.AppendGrip
@@ -134,7 +150,7 @@ namespace Key_master.Keys
             //        )
             //    );
 
-           
+
             return true;
         }
 
