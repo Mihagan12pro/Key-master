@@ -11,11 +11,11 @@ using System.Windows.Media;
 namespace Key_master.Keys
 {
     [CustomEntity("1C925FA1-842B-49CD-924F-4ABF9717DB62", "Key", "Key Entity")]
-    internal class Key : McCustomBase, IMcSerializable
+    internal class Key : McCustomBase, IMcStreamSerializable
     {
-        public Vector3d WidthVector { get; protected set; }
-        public Vector3d LengthVector { get; protected set; }
-        public Vector3d DiagonalVector { get; protected set; }
+        public Vector3d WidthVector;
+        public Vector3d LengthVector;
+        public Vector3d DiagonalVector;
 
         protected Point3d _originPoint, _center;
 
@@ -76,25 +76,47 @@ namespace Key_master.Keys
         }
 
 
-        public override hresult OnMcSerialization(McSerializationInfo info)
+        public override hresult read(McStream stream)
         {
-            info.Add("originPoint", _originPoint);
-            info.Add("center", _center);
+            short major, minor;
+            if (!stream.GetVersion(out major, out minor))
+                return hresult.e_MakeMeProxy;
 
-            return hresult.s_Ok;
-        }
-
-
-        public override hresult OnMcDeserialization(McSerializationInfo info)
-        {
-            if (!info.GetValue("originPoint", out _originPoint) ||  !info.GetValue("center", out _center))
-            {
+            if (!stream.GetPoint(out _center))
                 return hresult.e_Fail;
-            }
+            if (!stream.GetPoint(out _originPoint))
+                return hresult.e_Fail;
+
+            if (!stream.GetVector(out WidthVector))
+                return hresult.e_Fail;
+            if (!stream.GetVector(out LengthVector))
+                return hresult.e_Fail;
+            if (!stream.GetVector(out DiagonalVector))
+                return hresult.e_Fail;
 
             return hresult.s_Ok;
         }
 
+
+        public override hresult write(McStream stream)
+        {
+            stream.PutVersion(1, 0);
+
+            stream.PutVector(DiagonalVector);
+            stream.PutVector(LengthVector);
+            stream.PutVector(WidthVector);
+
+            stream.PutPoint(_originPoint);
+            stream.PutPoint(_center);
+
+            return hresult.s_Ok;
+        }
+
+
+        public override bool SupportMcStreamSerialization()
+        {
+            return true;
+        }
 
         public override void OnTransform(Matrix3d tfm)
         {
@@ -140,67 +162,31 @@ namespace Key_master.Keys
                 );
 
 
-            //info.AppendGrip
-            //    (
-            //        new McSmartGrip<Key>
-            //        (
-            //           _originPoint,
+            info.AppendGrip
+                (
+                    new McSmartGrip<Key>
+                    (
+                       _originPoint + DiagonalVector,
 
-            //           (obj, grip, offset) => ScaleTransform(obj, _originPoint, offset)
-            //        )
-            //    );
+                       (obj, grip, offset) =>
+                       {
+                           if (obj.TryModify())
+                           {
+                               obj.DiagonalVector += offset;
+                               Matrix3d matrix3dDisplacement = Matrix3d.Displacement(offset);
+
+                               obj._center = obj._center.TransformBy(matrix3dDisplacement);
+                           }
+                       }
+                    )
+                );
 
 
             return true;
         }
 
 
-        private void DisplaceTransform(Key obj, Point3d grip, Vector3d offset)
-        {
-            if (obj.TryModify())
-            {
-                if (grip == obj._center)
-                {
-                    //obj._center += offset;
-
-                    //Matrix3d matrix3dDisplacement = Matrix3d.Displacement(offset);
-
-                    //obj._originPoint = _originPoint.TransformBy(matrix3dDisplacement);
-                }
-            }
-        }
-
-
-        private void ScaleTransform(Key obj, Point3d grip, Vector3d offset)
-        {
-            if (obj.TryModify())
-            {
-                if (grip == obj._originPoint)
-                {
-                    //Point3d point1 = obj._originPoint;
-                    //Point3d point2 = obj._point2;
-
-                    //Vector3d originalDiagonal = new Vector3d(point2.X - point1.X, point2.Y - point1.Y, point2.Z - point1.Z);
-
-                    //obj._originPoint += offset;
-
-                    //point1 = obj._originPoint;
-
-                    //Vector3d scaledDiagonal = new Vector3d(point2.X - point1.X, point2.Y - point1.Y, point2.Z - point1.Z);
-
-                    //double k = (scaledDiagonal.Length / originalDiagonal.Length);
-
-                    //obj.WidthVector = k * obj.WidthVector;
-                    //obj.LengthVector = k * obj.LengthVector;
-
-                    //Console.WriteLine(obj.LengthVector);
-                    //Console.WriteLine(obj.WidthVector);
-
-                    //obj._center = new Point3d(0.5 * (point1.X + point2.X), 0.5 * (point1.Y + point2.Y), 0.5 * (point1.Z + point2.Z));
-                }
-            }
-        }
-
+       
 
         public bool TryModify()
         {
