@@ -5,8 +5,10 @@ using Multicad.Geometry;
 using Multicad.Runtime;
 using Multicad.Symbols.Specification;
 using Multicad.Wpf.Controls;
+using Multicad.Wpf.Controls.McGanttChart;
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Key_master.Keys
@@ -132,40 +134,16 @@ namespace Key_master.Keys
 
         public override bool GetGripPoints(GripPointsInfo info)
         {
-
-
-            info.AppendGrip
-                (
-                    new McSmartGrip<Key>
-                        (
-                            point2,
-                            (obj, grip, offset) =>
-                            {
-                                if (obj.TryModify())
-                                {
-                                    obj.point2 += offset;
-
-                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
-                                }
-                            }
-                        )
-                );
             info.AppendGrip
                (
                    new McSmartGrip<Key>
                        (
                            center,
-                           (obj, grip, offset) =>
-                           {
-                               if (obj.TryModify())
-                               {
-                                   obj.center += offset;
-                                   obj.point1 += offset;
-                                   obj.point2 += offset;
-                               }
-                           }
+
+                           (obj, grip, offset) => Displace(obj, center, offset)
                        )
                );
+
 
 
             info.AppendGrip
@@ -173,15 +151,8 @@ namespace Key_master.Keys
                     new McSmartGrip<Key>
                         (
                             point1,
-                            (obj, grip, offset) =>
-                            {
-                                if (obj.TryModify())
-                                {
-                                    obj.point1 += offset;
 
-                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
-                                }
-                            }
+                            (obj, grip, offset) => Scale(obj, point1, offset)
                         )
                 );
 
@@ -189,17 +160,20 @@ namespace Key_master.Keys
                 (
                     new McSmartGrip<Key>
                         (
-                            new Point3d(point1.X, point2.Y, 0),
-                            (obj, grip, offset) =>
-                            {
-                                if (obj.TryModify())
-                                {
-                                    obj.point1 = new Point3d(obj.point1.X + offset.X, obj.point1.Y,0);
-                                    obj.point2 = new Point3d(obj.point2.X,obj.point2.Y + offset.Y,0);
+                            point2,
 
-                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
-                                }
-                            }
+                            (obj, grip, offset) => Scale(obj, point2, offset)
+                        )
+                );
+
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<Key>
+                        (
+                            new Point3d(point1.X, point2.Y, 0),
+
+                            (obj, grip, offset) => Scale(obj, new Point3d(point1.X, point2.Y, 0),offset)
                         )
 
                 );
@@ -210,16 +184,8 @@ namespace Key_master.Keys
                     new McSmartGrip<Key>
                         (
                             new Point3d(point2.X, point1.Y, 0),
-                            (obj, grip, offset) =>
-                            {
-                                if (obj.TryModify())
-                                {
-                                    obj.point1 = new Point3d(obj.point1.X, obj.point1.Y + offset.Y, 0);
-                                    obj.point2 = new Point3d(obj.point2.X + offset.X, obj.point2.Y, 0);
 
-                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
-                                }
-                            }
+                            (obj, grip, offset) => Scale(obj, new Point3d(point2.X, point1.Y, 0),offset)
                         )
 
                 );
@@ -229,15 +195,8 @@ namespace Key_master.Keys
                     new McSmartGrip<Key>
                         (
                             new Point3d(point1.X, center.Y, 0),
-                            (obj, grip, offset) =>
-                            {
-                                if (obj.TryModify())
-                                {
-                                    obj.point1 = new Point3d(obj.point1.X + offset.X, obj.point1.Y, 0);
 
-                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
-                                }
-                            }
+                            (obj, grip, offset) => Scale(obj, new Point3d(point1.X, center.Y, 0),offset)
                         )
 
                 );
@@ -247,15 +206,8 @@ namespace Key_master.Keys
                     new McSmartGrip<Key>
                         (
                             new Point3d(point2.X, center.Y, 0),
-                            (obj, grip, offset) =>
-                            {
-                                if (obj.TryModify())
-                                {
-                                    obj.point2 = new Point3d(obj.point2.X + offset.X, obj.point2.Y, 0);
 
-                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
-                                }
-                            }
+                            (obj, grip, offset) => Scale(obj, new Point3d(point2.X, center.Y, 0),offset)
                         )
 
                 );
@@ -265,15 +217,8 @@ namespace Key_master.Keys
                     new McSmartGrip<Key>
                         (
                             new Point3d(center.X, point1.Y, 0),
-                            (obj, grip, offset) =>
-                            {
-                                if (obj.TryModify())
-                                {
-                                    obj.point1 = new Point3d(obj.point1.X,offset.Y + obj.point1.Y, 0);
 
-                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
-                                }
-                            }
+                            (obj, grip, offset) => Scale(obj, new Point3d(center.X, point1.Y, 0), offset)
                         )
 
                 );
@@ -283,20 +228,90 @@ namespace Key_master.Keys
                     new McSmartGrip<Key>
                         (
                             new Point3d(center.X, point2.Y, 0),
-                            (obj, grip, offset) =>
-                            {
-                                if (obj.TryModify())
-                                {
-                                    obj.point2 = new Point3d(obj.point2.X, offset.Y + obj.point2.Y, 0);
 
-                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
-                                }
-                            }
+                            (obj, grip, offset) => Scale(obj, new Point3d(center.X, point2.Y, 0), offset)
                         )
 
                 );
 
             return true;
+        }
+
+
+        protected virtual void Displace(Key obj, Point3d grip, Vector3d offset)
+        {
+            if (obj.TryModify())
+            {
+               if (grip == obj.center)
+                {
+                    obj.center += offset;
+                    obj.point1 += offset;
+                    obj.point2 += offset;
+                }
+            }
+        }
+
+
+        protected virtual void Scale(Key obj, Point3d grip, Vector3d offset)
+        {
+            Point3d point1 = obj.point1;
+            Point3d point2 = obj.point2;
+            Point3d center = obj.center;
+
+            Point3d point3 = new Point3d(point1.X, point2.Y, 0);
+            Point3d point4 = new Point3d(point2.X, point1.Y, 0);
+
+            Point3d rightPoint = new Point3d(point1.X, center.Y, 0);
+            Point3d leftPoint = new Point3d(point2.X, center.Y, 0);
+            Point3d topPoint = new Point3d(center.X, point1.Y, 0);
+            Point3d bottomPoint = new Point3d(center.X, point2.Y, 0);
+
+            if (obj.TryModify())
+            {
+                if (grip == obj.point1 || grip == obj.point2 || grip == point3 || grip == point4 || grip == rightPoint || grip == leftPoint || grip == topPoint || grip == bottomPoint)
+                {
+                    if (grip == obj.point1)
+                    {
+                        obj.point1 += offset;
+                    }
+                    else if (grip == obj.point2) 
+                    {
+                        obj.point2 += offset;
+                    }
+                
+                    else if (grip == point3)
+                    {
+                        obj.point1 = new Point3d(point1.X + offset.X, point1.Y, 0);
+                        obj.point2 = new Point3d(point2.X, point2.Y + offset.Y, 0);
+                    }
+                    else if (grip == point4)
+                    {
+                        obj.point1 = new Point3d(point1.X, point1.Y + offset.Y, 0);
+                        obj.point2 = new Point3d(point2.X + offset.X, point2.Y, 0);
+                    }
+                    else if (grip == rightPoint)
+                    {
+                        obj.point1 = new Point3d(point1.X + offset.X, point1.Y, 0);
+                    }
+                    else if (grip == leftPoint)
+                    {
+                        obj.point2 = new Point3d(point2.X + offset.X, point2.Y, 0);
+                    }
+                    else if (grip == topPoint)
+                    {
+                        obj.point1 = new Point3d(point1.X, offset.Y + point1.Y, 0);
+                    }
+                    else if (grip == bottomPoint)
+                    {
+                        obj.point2 = new Point3d(point2.X, offset.Y + point2.Y, 0);
+                    }
+
+                    point1 = obj.point1;
+                    point2 = obj.point2;
+                }
+
+               obj.center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
+            }
         }
 
 
