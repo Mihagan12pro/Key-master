@@ -4,6 +4,7 @@ using Multicad.DatabaseServices;
 using Multicad.Geometry;
 using Multicad.Runtime;
 using Multicad.Symbols.Specification;
+using Multicad.Wpf.Controls;
 using System;
 using System.Windows;
 using System.Windows.Media;
@@ -11,22 +12,42 @@ using System.Windows.Media;
 namespace Key_master.Keys
 {
     [CustomEntity("1C925FA1-842B-49CD-924F-4ABF9717DB62", "Key", "Key Entity")]
-    internal class Key : McCustomBase, IMcStreamSerializable
+    internal class Key : McCustomBase, IMcSerializable
     {
-        public Vector3d WidthVector;
-        public Vector3d LengthVector;
-        public Vector3d DiagonalVector;
+        protected Point3d point1, point2, center;
 
-        protected Point3d _originPoint, _center;
+        public double Width
+        {
+            get
+            {
+                Point3d point3 = new Point3d(point1.X, point2.Y, 0);
 
+                Vector3d widthVector = new Vector3d(point3.X - point1.X, point3.Y - point1.Y,0);
+
+                return widthVector.Length;
+            }
+        }
+
+
+        public double Length
+        {
+            get
+            {
+                Point3d point4 = new Point3d(point2.X, point1.Y, 0);
+
+                Vector3d lengthVector = new Vector3d(point4.X - point1.X, point4.Y - point1.Y, 0);
+
+                return lengthVector.Length;
+            }
+        }
 
         public override void OnDraw(GeometryBuilder dc)
         {
             dc.Clear();
 
-            Point3d point2 =  _originPoint + DiagonalVector;
 
-            dc.DrawPolyline(new Point3d[] { _originPoint, new Point3d(_originPoint.X, point2.Y, 0), point2, new Point3d(point2.X, _originPoint.Y, 0), _originPoint });
+
+            dc.DrawPolyline(new Point3d[] { point1, new Point3d(point1.X, point2.Y, 0), point2, new Point3d(point2.X, point1.Y, 0), point1 });
         }
 
 
@@ -39,10 +60,10 @@ namespace Key_master.Keys
             InputJig.PropertyInpector.SetSource(this);
 
 
-            jig.GetRealNumber("Длина шпоночного паза: ",out double length);
+            jig.GetRealNumber("Длина шпоночного паза: ", out double length);
             if (length == 0)
             {
-                MessageBox.Show("Длина шпоночного паза не должна быть равно нулю!","Ошибка!",MessageBoxButton.OK,MessageBoxImage.Error);
+                MessageBox.Show("Длина шпоночного паза не должна быть равно нулю!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
                 return hresult.e_Fail;
             }
             length = Math.Abs(length);
@@ -50,114 +71,136 @@ namespace Key_master.Keys
             jig.GetRealNumber("Ширина шпоночного паза: ", out double width);
             if (width == 0)
             {
-                 MessageBox.Show("Ширина шпоночного паза не должна быть равно нулю!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
-                 return hresult.e_Fail;
+                MessageBox.Show("Ширина шпоночного паза не должна быть равно нулю!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+                return hresult.e_Fail;
             }
             width = Math.Abs(width);
 
             DbEntity.AddToCurrentDocument();
 
-            _center = jig.GetPoint("Куда вставить шпоночный паз: ").Point;
+            center = jig.GetPoint("Куда вставить шпоночный паз: ").Point;
 
-            Point3d A = new Point3d(_center.X - length * 0.5, _center.Y - width * 0.5, 0);
-            Point3d B = new Point3d(_center.X + length * 0.5, _center.Y - width * 0.5, 0);
-            Point3d C = new Point3d(_center.X + length * 0.5, _center.Y + width * 0.5, 0);
-            Point3d D = new Point3d(_center.X - length * 0.5, _center.Y + width * 0.5, 0);
+            point1 = new Point3d(center.X + length * 0.5, center.Y + width * 0.5, 0);
+            point2 = new Point3d(center.X - length * 0.5, center.Y - width * 0.5, 0);
 
-            DiagonalVector = new Vector3d(C.X - A.X, C.Y - A.Y, C.Z - A.Z);
-            WidthVector = new Vector3d(D.X - A.X, D.Y - A.Y, D.Z - A.Z);
-            LengthVector = new Vector3d(B.X - A.X, B.Y - A.Y, B.Z - A.Z);
+            //point3 = new Point3d(point1.X, point2.Y,0);
+            //point4 = new Point3d(point2.X, point1.Y, 0);
 
-            _originPoint = A;
+            
 
             DbEntity.Update();
-           
-            return hresult.s_Ok;
-        }
-
-
-        public override hresult read(McStream stream)
-        {
-            short major, minor;
-            if (!stream.GetVersion(out major, out minor))
-                return hresult.e_MakeMeProxy;
-
-            if (!stream.GetPoint(out _center))
-                return hresult.e_Fail;
-            if (!stream.GetPoint(out _originPoint))
-                return hresult.e_Fail;
-
-            if (!stream.GetVector(out WidthVector))
-                return hresult.e_Fail;
-            if (!stream.GetVector(out LengthVector))
-                return hresult.e_Fail;
-            if (!stream.GetVector(out DiagonalVector))
-                return hresult.e_Fail;
 
             return hresult.s_Ok;
         }
 
 
-        public override hresult write(McStream stream)
+        public override hresult OnMcSerialization(McSerializationInfo info)
         {
-            stream.PutVersion(1, 0);
-
-            stream.PutVector(DiagonalVector);
-            stream.PutVector(LengthVector);
-            stream.PutVector(WidthVector);
-
-            stream.PutPoint(_originPoint);
-            stream.PutPoint(_center);
+            info.Add("point1", point1);
+            info.Add("point2", point2);
+            info.Add("center", center);
 
             return hresult.s_Ok;
         }
 
-
-        public override bool SupportMcStreamSerialization()
+        public override hresult OnMcDeserialization(McSerializationInfo info)
         {
-            return true;
+            if (!info.GetValue("point1", out point1) || !info.GetValue("point2", out point2) || !info.GetValue("center",out center))
+            {
+                return hresult.e_Fail;
+            }
+
+            return hresult.s_Ok;
         }
+
 
         public override void OnTransform(Matrix3d tfm)
         {
             if (!TryModify())
                 return;
-            
-            _originPoint = _originPoint.TransformBy(tfm);
-            _center = _center.TransformBy(tfm);
 
-            WidthVector = WidthVector.TransformBy(tfm);
-            LengthVector = LengthVector.TransformBy(tfm);
-            DiagonalVector = DiagonalVector.TransformBy(tfm);
+            point1 = point1.TransformBy(tfm);
+
+            point2 = point1.TransformBy(tfm);
+
+            center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
         }
+
+
+
 
 
         public override bool GetGripPoints(GripPointsInfo info)
         {
+
+
             info.AppendGrip
                 (
+                    new McSmartGrip<Key>
+                        (
+                            point2,
+                            (obj, grip, offset) =>
+                            {
+                                if (obj.TryModify())
+                                {
+                                    obj.point2 += offset;
+
+                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
+                                }
+                            }
+                        )
+                );
+            info.AppendGrip
+               (
                    new McSmartGrip<Key>
-                   (
-                       _center,
-
-                       (obj, grip, offset) =>
-                       {
-                           if (obj.TryModify())
+                       (
+                           center,
+                           (obj, grip, offset) =>
                            {
-                               obj._center += offset;
-
-                               Matrix3d matrix3dDisplacement = Matrix3d.Displacement(offset);
-
-                               //obj._originPoint = _originPoint.TransformBy(matrix3dDisplacement);
-
-                               obj.DiagonalVector = obj.DiagonalVector.TransformBy(matrix3dDisplacement);
-                               obj.WidthVector = obj.WidthVector.TransformBy(matrix3dDisplacement);
-                               obj.LengthVector = obj.LengthVector.TransformBy(matrix3dDisplacement);
-
-                               obj._originPoint = obj._originPoint.TransformBy(matrix3dDisplacement); 
+                               if (obj.TryModify())
+                               {
+                                   obj.center += offset;
+                                   obj.point1 += offset;
+                                   obj.point2 += offset;
+                               }
                            }
-                       }
-                   )
+                       )
+               );
+
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<Key>
+                        (
+                            point1,
+                            (obj, grip, offset) =>
+                            {
+                                if (obj.TryModify())
+                                {
+                                    obj.point1 += offset;
+
+                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
+                                }
+                            }
+                        )
+                );
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<Key>
+                        (
+                            new Point3d(point1.X, point2.Y, 0),
+                            (obj, grip, offset) =>
+                            {
+                                if (obj.TryModify())
+                                {
+                                    obj.point1 = new Point3d(obj.point1.X + offset.X, obj.point1.Y,0);
+                                    obj.point2 = new Point3d(obj.point2.X,obj.point2.Y + offset.Y,0);
+
+                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
+                                }
+                            }
+                        )
 
                 );
 
@@ -165,28 +208,97 @@ namespace Key_master.Keys
             info.AppendGrip
                 (
                     new McSmartGrip<Key>
-                    (
-                       _originPoint + DiagonalVector,
+                        (
+                            new Point3d(point2.X, point1.Y, 0),
+                            (obj, grip, offset) =>
+                            {
+                                if (obj.TryModify())
+                                {
+                                    obj.point1 = new Point3d(obj.point1.X, obj.point1.Y + offset.Y, 0);
+                                    obj.point2 = new Point3d(obj.point2.X + offset.X, obj.point2.Y, 0);
 
-                       (obj, grip, offset) =>
-                       {
-                           if (obj.TryModify())
-                           {
-                               obj.DiagonalVector += offset;
-                               Matrix3d matrix3dDisplacement = Matrix3d.Displacement(offset);
+                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
+                                }
+                            }
+                        )
 
-                               obj._center = obj._center.TransformBy(matrix3dDisplacement);
-                           }
-                       }
-                    )
                 );
 
+            info.AppendGrip
+                (
+                    new McSmartGrip<Key>
+                        (
+                            new Point3d(point1.X, center.Y, 0),
+                            (obj, grip, offset) =>
+                            {
+                                if (obj.TryModify())
+                                {
+                                    obj.point1 = new Point3d(obj.point1.X + offset.X, obj.point1.Y, 0);
+
+                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
+                                }
+                            }
+                        )
+
+                );
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<Key>
+                        (
+                            new Point3d(point2.X, center.Y, 0),
+                            (obj, grip, offset) =>
+                            {
+                                if (obj.TryModify())
+                                {
+                                    obj.point2 = new Point3d(obj.point2.X + offset.X, obj.point2.Y, 0);
+
+                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
+                                }
+                            }
+                        )
+
+                );
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<Key>
+                        (
+                            new Point3d(center.X, point1.Y, 0),
+                            (obj, grip, offset) =>
+                            {
+                                if (obj.TryModify())
+                                {
+                                    obj.point1 = new Point3d(obj.point1.X,offset.Y + obj.point1.Y, 0);
+
+                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
+                                }
+                            }
+                        )
+
+                );
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<Key>
+                        (
+                            new Point3d(center.X, point2.Y, 0),
+                            (obj, grip, offset) =>
+                            {
+                                if (obj.TryModify())
+                                {
+                                    obj.point2 = new Point3d(obj.point2.X, offset.Y + obj.point2.Y, 0);
+
+                                    obj.center = new Point3d((obj.point1.X + obj.point2.X) / 2, (obj.point1.Y + obj.point2.Y) / 2, (obj.point1.Z + obj.point2.Z) / 2);
+                                }
+                            }
+                        )
+
+                );
 
             return true;
         }
 
-
-       
 
         public bool TryModify()
         {
@@ -197,7 +309,7 @@ namespace Key_master.Keys
 
         public Key()
         {
-            
+
         }
     }
 }
