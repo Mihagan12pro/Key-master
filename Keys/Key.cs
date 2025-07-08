@@ -29,6 +29,7 @@ namespace Key_master.Keys
                 if (TryModify())
                 {
                     point1 = new Point3d(center.X + Length * 0.5, center.Y + value * 0.5, 0);
+                    point2 = new Point3d(center.X - Length * 0.5, center.Y - value * 0.5, 0);
 
                     center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
                 }
@@ -51,6 +52,7 @@ namespace Key_master.Keys
                 if (TryModify())
                 {
                     point1 = new Point3d(center.X + value * 0.5, center.Y + Width * 0.5, 0);
+                    point2 = new Point3d(center.X - value * 0.5, center.Y - Width * 0.5, 0);
 
                     center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
                 }

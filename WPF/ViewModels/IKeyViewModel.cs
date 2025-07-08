@@ -2,7 +2,6 @@
 using Key_master.WPF.Services;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows.Input;
 
 namespace Key_master.WPF.ViewModels
 {
