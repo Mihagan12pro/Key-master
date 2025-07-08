@@ -1,10 +1,7 @@
 ﻿
 using Key_master.WPF.Services;
-using Key_master.WPF.Views;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows;
-using System.Windows.Input;
 
 namespace Key_master.WPF.ViewModels
 {
@@ -58,11 +55,10 @@ namespace Key_master.WPF.ViewModels
 
 
         private bool? _dialogResult;
-
         public bool? DialogResult
         {
             get { return _dialogResult; }
-            protected set
+            set
             {
                 _dialogResult = value;
                 OnPropertyChanged("DialogResult");
@@ -79,7 +75,8 @@ namespace Key_master.WPF.ViewModels
                 
         }
 
-        private void Ok()
+
+        public void Ok()
         {
             DialogResult = true;
         }
