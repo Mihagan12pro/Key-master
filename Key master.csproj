@@ -11,6 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Services\**" />
+    <Page Remove="Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="imapimgd">
       <HintPath>..\NC_SDK_RU_25.0.6785.4733.7843\include-x64\imapimgd.dll</HintPath>
 	  <Private>False</Private>
@@ -27,10 +34,6 @@
       <HintPath>..\NC_SDK_RU_25.0.6785.4733.7843\include-x64\mapiwpf.dll</HintPath>
       <Private>False</Private>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

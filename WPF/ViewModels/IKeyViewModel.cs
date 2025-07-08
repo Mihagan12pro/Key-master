@@ -1,0 +1,18 @@
+﻿
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
+
+namespace Key_master.WPF.ViewModels
+{
+    internal interface IKeyViewModel : INotifyPropertyChanged
+    {
+        void OnPropertyChanged([CallerMemberName] string prop = "");
+
+        string Width { get; set; }
+
+        string Length { get; set; }
+
+        bool IsOkButtonEnabled { get; set; }
+    }
+}

@@ -1,15 +1,10 @@
-﻿using Multicad;
+﻿using Key_master.WPF.Views;
+using Multicad;
 using Multicad.CustomObjectBase;
 using Multicad.DatabaseServices;
 using Multicad.Geometry;
 using Multicad.Runtime;
-using Multicad.Symbols.Specification;
-using Multicad.Wpf.Controls;
-using Multicad.Wpf.Controls.McGanttChart;
-using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace Key_master.Keys
 {
@@ -17,6 +12,7 @@ namespace Key_master.Keys
     internal class Key : McCustomBase, IMcSerializable
     {
         protected Point3d point1, point2, center;
+
 
         public double Width
         {
@@ -27,6 +23,15 @@ namespace Key_master.Keys
                 Vector3d widthVector = new Vector3d(point3.X - point1.X, point3.Y - point1.Y,0);
 
                 return widthVector.Length;
+            }
+            set
+            {
+                if (TryModify())
+                {
+                    point1 = new Point3d(center.X + Length * 0.5, center.Y + value * 0.5, 0);
+
+                    center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
+                }
             }
         }
 
@@ -41,13 +46,21 @@ namespace Key_master.Keys
 
                 return lengthVector.Length;
             }
+            set
+            {
+                if (TryModify())
+                {
+                    point1 = new Point3d(center.X + value * 0.5, center.Y + Width * 0.5, 0);
+
+                    center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
+                }
+            }
         }
+
 
         public override void OnDraw(GeometryBuilder dc)
         {
             dc.Clear();
-
-
 
             dc.DrawPolyline(new Point3d[] { point1, new Point3d(point1.X, point2.Y, 0), point2, new Point3d(point2.X, point1.Y, 0), point1 });
         }
@@ -85,11 +98,6 @@ namespace Key_master.Keys
             point1 = new Point3d(center.X + length * 0.5, center.Y + width * 0.5, 0);
             point2 = new Point3d(center.X - length * 0.5, center.Y - width * 0.5, 0);
 
-            //point3 = new Point3d(point1.X, point2.Y,0);
-            //point4 = new Point3d(point2.X, point1.Y, 0);
-
-            
-
             DbEntity.Update();
 
             return hresult.s_Ok;
@@ -104,6 +112,7 @@ namespace Key_master.Keys
 
             return hresult.s_Ok;
         }
+
 
         public override hresult OnMcDeserialization(McSerializationInfo info)
         {
@@ -129,7 +138,20 @@ namespace Key_master.Keys
         }
 
 
+        public override hresult OnEdit(Point3d pnt, EditFlags lFlag)
+        {
+            EditWindow window = new EditWindow(Width,Length);
 
+            window.ShowDialog();
+            if (window.DialogResult == true)
+            {
+                Width = Convert.ToDouble(window.WidthTB.Text);
+
+                Length = Convert.ToDouble(window.LengthTB.Text);
+            }
+
+            return hresult.s_Ok;
+        }
 
 
         public override bool GetGripPoints(GripPointsInfo info)
@@ -145,7 +167,6 @@ namespace Key_master.Keys
                );
 
 
-
             info.AppendGrip
                 (
                     new McSmartGrip<Key>
@@ -155,6 +176,7 @@ namespace Key_master.Keys
                             (obj, grip, offset) => Scale(obj, point1, offset)
                         )
                 );
+
 
             info.AppendGrip
                 (
@@ -201,6 +223,7 @@ namespace Key_master.Keys
 
                 );
 
+
             info.AppendGrip
                 (
                     new McSmartGrip<Key>
@@ -222,6 +245,7 @@ namespace Key_master.Keys
                         )
 
                 );
+
 
             info.AppendGrip
                 (
