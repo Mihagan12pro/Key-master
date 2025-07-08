@@ -1,6 +1,10 @@
 ﻿
+using Key_master.WPF.Services;
+using Key_master.WPF.Views;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
+using System.Windows.Input;
 
 namespace Key_master.WPF.ViewModels
 {
@@ -50,6 +54,34 @@ namespace Key_master.WPF.ViewModels
                 _isOkButtonEnabled = value;
                 OnPropertyChanged();
             }
+        }
+
+
+        private bool? _dialogResult;
+
+        public bool? DialogResult
+        {
+            get { return _dialogResult; }
+            protected set
+            {
+                _dialogResult = value;
+                OnPropertyChanged("DialogResult");
+            }
+        }
+
+
+        public RelayCommand OkCommand 
+        {
+            get
+            {
+                return new RelayCommand((obj) => Ok());
+            }
+                
+        }
+
+        private void Ok()
+        {
+            DialogResult = true;
         }
 
 
