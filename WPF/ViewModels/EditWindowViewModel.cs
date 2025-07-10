@@ -92,9 +92,9 @@ namespace Key_master.WPF.ViewModels
 
         public EditWindowViewModel(double width,double length)
         {
-            Width = Convert.ToString(width);
+            Width = Convert.ToString(Math.Round(width, 6));
 
-            Length = Convert.ToString(length);
+            Length = Convert.ToString(Math.Round(length, 6));
         }
     }
 }

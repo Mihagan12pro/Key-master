@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Key_master.WPF.Views"
         xmlns:serv="clr-namespace:Key_master.WPF.Services"
+        xmlns:mCAD="http://schemas.mcad.com/xaml/presentation"
         mc:Ignorable="d"
         Title="Редактор шпоночного паза" Height="150" MinHeight="150" MinWidth="400" WindowStyle="ToolWindow"  MaxHeight="250" MaxWidth="450" Background="#f0f0f0" serv:DialogCloser.DialogResult="{Binding DialogResult}">
     <Window.Resources>
@@ -21,11 +22,29 @@
             <StackPanel Height="50" Margin="0 20" HorizontalAlignment="Left" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
                     <Label Content="b, мм" Padding="0" Height="15" Width="30"  Margin="12 0 5 0"></Label>
-                    <TextBox  Name="WidthTB" Style="{StaticResource BasicTextBoxStyle}" Text="{Binding Width, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                    <TextBox  Name="WidthTB" Style="{StaticResource BasicTextBoxStyle}">
+                        <TextBox.Text>
+                            <Binding Path="Width" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <mCAD:RealValueValidationRule ValidatesOnTargetUpdated="True" MinValue="0" MinIsStrict="True" NotANumberErrorMessage="Введено не число!" OutOfRangeErrorMessage="Число должно быть больше нуля!">
+                                        
+                                    </mCAD:RealValueValidationRule>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="l, мм" Padding="0" Height="15" Width="30"  Margin="12 0 5 0"></Label>
-                    <TextBox  Name="LengthTB" Style="{StaticResource BasicTextBoxStyle}" Text="{Binding Length, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                    <TextBox  Name="LengthTB" Style="{StaticResource BasicTextBoxStyle}">
+                        <Binding Path="Length" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <mCAD:RealValueValidationRule ValidatesOnTargetUpdated="True" MinValue="0" MinIsStrict="True" NotANumberErrorMessage="Введено не число!" OutOfRangeErrorMessage="Число должно быть больше нуля!">
+
+                                </mCAD:RealValueValidationRule>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox>
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
