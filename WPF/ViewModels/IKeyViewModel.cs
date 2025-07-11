@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Key_master.WPF.ViewModels
 {
-    internal interface IKeyViewModel : INotifyPropertyChanged
+    internal interface IKeyViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         void OnPropertyChanged([CallerMemberName] string prop = "");
 
@@ -19,6 +19,6 @@ namespace Key_master.WPF.ViewModels
 
         void Ok();
 
-        bool? DialogResult { get; set; }
+        bool? DialogResult { get; set;}
     }
 }

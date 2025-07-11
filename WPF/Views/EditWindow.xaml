@@ -24,11 +24,9 @@
                     <Label Content="b, мм" Padding="0" Height="15" Width="30"  Margin="12 0 5 0"></Label>
                     <TextBox  Name="WidthTB" Style="{StaticResource BasicTextBoxStyle}">
                         <TextBox.Text>
-                            <Binding Path="Width" UpdateSourceTrigger="PropertyChanged">
+                            <Binding Path="Width" UpdateSourceTrigger="PropertyChanged" ValidatesOnDataErrors="True">
                                 <Binding.ValidationRules>
-                                    <mCAD:RealValueValidationRule ValidatesOnTargetUpdated="True" MinValue="0" MinIsStrict="True" NotANumberErrorMessage="Введено не число!" OutOfRangeErrorMessage="Число должно быть больше нуля!">
-                                        
-                                    </mCAD:RealValueValidationRule>
+                                    <DataErrorValidationRule />
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
@@ -37,18 +35,16 @@
                 <StackPanel Orientation="Horizontal">
                     <Label Content="l, мм" Padding="0" Height="15" Width="30"  Margin="12 0 5 0"></Label>
                     <TextBox  Name="LengthTB" Style="{StaticResource BasicTextBoxStyle}">
-                        <Binding Path="Length" UpdateSourceTrigger="PropertyChanged">
+                        <Binding Path="Length" UpdateSourceTrigger="PropertyChanged" ValidatesOnDataErrors="True">
                             <Binding.ValidationRules>
-                                <mCAD:RealValueValidationRule ValidatesOnTargetUpdated="True" MinValue="0" MinIsStrict="True" NotANumberErrorMessage="Введено не число!" OutOfRangeErrorMessage="Число должно быть больше нуля!">
-
-                                </mCAD:RealValueValidationRule>
+                                <DataErrorValidationRule />
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Margin="5" Width="70" Height="16" FontSize="10" IsDefault="True" Command="{Binding OkCommand}">Ок</Button>
+                <Button Margin="5" Width="70" Height="16" FontSize="10" IsDefault="True" Command="{Binding OkCommand}" IsEnabled="{Binding IsOkButtonEnabled}">Ок</Button>
                 <Button Margin="5" Width="70" Height="16" FontSize="10" IsCancel="True">Отмена</Button>
             </StackPanel>
         </StackPanel>
