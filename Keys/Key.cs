@@ -4,6 +4,7 @@ using Multicad.CustomObjectBase;
 using Multicad.DatabaseServices;
 using Multicad.Geometry;
 using Multicad.Runtime;
+using System.Globalization;
 using System.Windows;
 
 namespace Key_master.Keys
@@ -147,9 +148,20 @@ namespace Key_master.Keys
             window.ShowDialog();
             if (window.DialogResult == true)
             {
-                Width = Convert.ToDouble(window.WidthTB.Text);
+                double width, length;
 
-                Length = Convert.ToDouble(window.LengthTB.Text);
+                if (!double.TryParse(window.WidthTB.Text, out width))
+                {
+                    double.TryParse(window.WidthTB.Text,NumberStyles.Any,CultureInfo.InvariantCulture, out width);
+                }
+                Width = width;
+
+
+                if (!double.TryParse(window.LengthTB.Text, out length))
+                {
+                    double.TryParse(window.LengthTB.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out length);
+                }
+                Length = length;
             }
 
             return hresult.s_Ok;
