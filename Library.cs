@@ -8,9 +8,9 @@ namespace Key_master
         [CommandMethod("KM_create_key", CommandFlags.NoCheck | CommandFlags.NoPrefix)]
         public static void CreateKeyCommand()
         {
-            Key key = new Key();
+            //Key key = new Key();
 
-            key.PlaceObject();
+            //key.PlaceObject();
         }
     }
 }
