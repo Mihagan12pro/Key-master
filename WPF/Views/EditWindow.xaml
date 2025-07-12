@@ -44,8 +44,8 @@
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Margin="5" Width="70" Height="16" FontSize="10" IsDefault="True" Command="{Binding OkCommand}" IsEnabled="{Binding IsOkButtonEnabled}">Ок</Button>
-                <Button Margin="5" Width="70" Height="16" FontSize="10" IsCancel="True">Отмена</Button>
+                <Button Margin="5" Width="70" Height="20" FontSize="10" IsDefault="True" Command="{Binding OkCommand}" IsEnabled="{Binding IsOkButtonEnabled}">Ок</Button>
+                <Button Margin="5" Width="70" Height="20" FontSize="10" IsCancel="True">Отмена</Button>
             </StackPanel>
         </StackPanel>
     </Grid>
