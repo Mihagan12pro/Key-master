@@ -1,11 +1,13 @@
-﻿using Multicad;
+﻿using Key_master.WPF.Views;
+using Multicad;
 using Multicad.CustomObjectBase;
 using Multicad.Geometry;
+using System.Globalization;
 using System.Windows.Input;
 
 namespace Key_master.Keys
 {
-    internal abstract class KeyBasic : McCustomBase, IMcSerializable
+    internal abstract class KeyBasic : McCustomBase, IMcSerializable, IGeometryParams
     {
         protected Point3d center, point1, point2;
 
@@ -35,6 +37,8 @@ namespace Key_master.Keys
 
 
         public string ?KeyType { get; protected set; }
+        public abstract double Width { get; set; }
+        public abstract double Length { get; set; }
 
         protected abstract void Scale(KeyBasic obj, Point3d grip, Vector3d offset);
 
@@ -44,6 +48,35 @@ namespace Key_master.Keys
         {
             TryModify(0);
             return true;
+        }
+
+
+        public override hresult OnEdit(Point3d pnt, EditFlags lFlag)
+        {
+            EditWindow window = new EditWindow(Width, Length);
+            window.Title += $" (исполнение {KeyType})";
+
+
+            window.ShowDialog();
+            if (window.DialogResult == true)
+            {
+                double width, length;
+
+                if (!double.TryParse(window.WidthTB.Text, out width))
+                {
+                    double.TryParse(window.WidthTB.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out width);
+                }
+                Width = width;
+
+
+                if (!double.TryParse(window.LengthTB.Text, out length))
+                {
+                    double.TryParse(window.LengthTB.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out length);
+                }
+                Length = length;
+            }
+
+            return hresult.s_Ok;
         }
     }
 }

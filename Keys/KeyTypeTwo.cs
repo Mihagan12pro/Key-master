@@ -10,9 +10,9 @@ using System.Windows;
 namespace Key_master.Keys
 {
     [CustomEntity("1C925FA1-842B-49CD-924F-4ABF9717DB62", "Key", "Key Entity")]
-    internal class KeyTypeTwo : KeyBasic, IGeometryParams
+    internal class KeyTypeTwo : KeyBasic
     {
-        public double Width 
+        public override double Width
         {
             get
             {
@@ -34,7 +34,8 @@ namespace Key_master.Keys
             }
         }
 
-        public double Length 
+
+        public override double Length
         {
             get
             {
@@ -55,6 +56,7 @@ namespace Key_master.Keys
                 }
             }
         }
+
 
         public override void OnDraw(GeometryBuilder dc)
         {
@@ -133,33 +135,6 @@ namespace Key_master.Keys
             point2 = point1.TransformBy(tfm);
 
             center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
-        }
-
-
-        public override hresult OnEdit(Point3d pnt, EditFlags lFlag)
-        {
-            EditWindow window = new EditWindow(Width, Length);
-
-            window.ShowDialog();
-            if (window.DialogResult == true)
-            {
-                double width, length;
-
-                if (!double.TryParse(window.WidthTB.Text, out width))
-                {
-                    double.TryParse(window.WidthTB.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out width);
-                }
-                Width = width;
-
-
-                if (!double.TryParse(window.LengthTB.Text, out length))
-                {
-                    double.TryParse(window.LengthTB.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out length);
-                }
-                Length = length;
-            }
-
-            return hresult.s_Ok;
         }
 
 
@@ -345,6 +320,12 @@ namespace Key_master.Keys
                     obj.Point2 += offset;
                 }
             }
+        }
+
+
+        public KeyTypeTwo()
+        {
+            KeyType = "2";
         }
     }
 }
