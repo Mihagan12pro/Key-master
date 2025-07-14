@@ -37,9 +37,7 @@ namespace Key_master.Keys
 
 
         public string ?KeyType { get; protected set; }
-
         public abstract double Width { get; set; }
-
         public abstract double Length { get; set; }
 
         protected abstract void Scale(KeyBasic obj, Point3d grip, Vector3d offset);
@@ -79,16 +77,6 @@ namespace Key_master.Keys
             }
 
             return hresult.s_Ok;
-        }
-
-
-        public KeyBasic(Point3d center, double width, double length)
-        {
-            this.center = center;
-
-            Width = width;
-
-            Length = length;
         }
     }
 }

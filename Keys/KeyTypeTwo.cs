@@ -68,7 +68,35 @@ namespace Key_master.Keys
 
         public override hresult PlaceObject(PlaceFlags lInsertType)
         {
+            InputJig jig = new InputJig();
+            jig.SetInputOptions(InputJig.InputReturnMode.Other);
+            jig.ForceInputNumbers = true;
+
+            InputJig.PropertyInpector.SetSource(this);
+
+
+            jig.GetRealNumber("Длина шпоночного паза: ", out double length);
+            if (length == 0)
+            {
+                MessageBox.Show("Длина шпоночного паза не должна быть равно нулю!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+                return hresult.e_Fail;
+            }
+            length = Math.Abs(length);
+
+            jig.GetRealNumber("Ширина шпоночного паза: ", out double width);
+            if (width == 0)
+            {
+                MessageBox.Show("Ширина шпоночного паза не должна быть равно нулю!", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+                return hresult.e_Fail;
+            }
+            width = Math.Abs(width);
+
             DbEntity.AddToCurrentDocument();
+
+            center = jig.GetPoint("Куда вставить шпоночный паз: ").Point;
+
+            point1 = new Point3d(center.X + length * 0.5, center.Y + width * 0.5, 0);
+            point2 = new Point3d(center.X - length * 0.5, center.Y - width * 0.5, 0);
 
             DbEntity.Update();
 
@@ -295,7 +323,7 @@ namespace Key_master.Keys
         }
 
 
-        public KeyTypeTwo(Point3d center, double width, double length) : base(center, width, length)
+        public KeyTypeTwo()
         {
             KeyType = "2";
         }
