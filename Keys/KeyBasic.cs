@@ -1,9 +1,9 @@
 ﻿using Key_master.WPF.Views;
 using Multicad;
 using Multicad.CustomObjectBase;
+using Multicad.DatabaseServices;
 using Multicad.Geometry;
 using System.Globalization;
-using System.Windows.Input;
 
 namespace Key_master.Keys
 {
@@ -37,12 +37,19 @@ namespace Key_master.Keys
 
 
         public string ?KeyType { get; protected set; }
+
+
         public abstract double Width { get; set; }
+        
+        
         public abstract double Length { get; set; }
+
 
         protected abstract void Scale(KeyBasic obj, Point3d grip, Vector3d offset);
 
+
         protected abstract void Displace(KeyBasic obj, Point3d grip, Vector3d offset);
+
 
         public bool TryModify()
         {
@@ -75,6 +82,50 @@ namespace Key_master.Keys
                 }
                 Length = length;
             }
+
+            return hresult.s_Ok;
+        }
+
+
+        public override hresult PlaceObject(PlaceFlags lInsertType)
+        {
+            InputJig jig = new InputJig();
+            jig.SetInputOptions(InputJig.InputReturnMode.Other);
+            jig.ForceInputNumbers = true;
+
+            InputJig.PropertyInpector.SetSource(this);
+
+
+            if (!jig.GetRealNumber("Длина шпоночного паза: ", out double length))
+                return hresult.e_Abort; 
+           
+            length = Math.Abs(length);
+
+            if (length == 0)
+                length = 50000;
+
+
+            if (!jig.GetRealNumber("Ширина шпоночного паза: ", out double width))
+                return hresult.e_Abort;
+
+            width = Math.Abs(width);
+
+            if (width == 0)
+                width = 50000;
+
+            DbEntity.AddToCurrentDocument();
+
+            InputResult result = jig.GetPoint("Куда вставить шпоночный паз: ");
+
+            if (result.Result == InputResult.ResultCode.Cancel)
+                return hresult.e_Abort;
+
+            center = result.Point;
+
+            Width = width;
+            Length = length;
+
+            DbEntity.Update();
 
             return hresult.s_Ok;
         }

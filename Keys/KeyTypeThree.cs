@@ -1,0 +1,85 @@
+﻿using Multicad.CustomObjectBase;
+using Multicad.DatabaseServices.StandardObjects;
+using Multicad.Geometry;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Key_master.Keys
+{
+    internal class KeyTypeThree : KeyBasic
+    {
+        public override double Width 
+        {
+            get
+            {
+                Point3d point3 = new Point3d(point1.X, point2.Y, 0);
+
+                Vector3d widthVector = new Vector3d(point3.X - point1.X, point3.Y - point1.Y, 0);
+
+                return widthVector.Length;
+            }
+            set
+            {
+                if (TryModify())
+                {
+                    point1 = new Point3d(center.X + Length * 0.5, center.Y + value * 0.5, 0);
+                    point2 = new Point3d(center.X - Length * 0.5, center.Y - value * 0.5, 0);
+
+                    center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
+                }
+            }
+        }
+
+
+        public override double Length 
+        {
+            get
+            {
+                Point3d point4 = new Point3d(point2.X, point1.Y, 0);
+
+                Vector3d lengthVector = new Vector3d(point4.X - point1.X, point4.Y - point1.Y, 0);
+
+                return lengthVector.Length;
+            }
+            set
+            {
+                if (TryModify())
+                {
+                    point1 = new Point3d(center.X + value * 0.5, center.Y + Width * 0.5, 0);
+                    point2 = new Point3d(center.X - value * 0.5, center.Y - Width * 0.5, 0);
+
+                    center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
+                }
+            }
+        }
+
+        protected override void Displace(KeyBasic obj, Point3d grip, Vector3d offset)
+        {
+           // throw new NotImplementedException();
+        }
+
+
+        protected override void Scale(KeyBasic obj, Point3d grip, Vector3d offset)
+        {
+            //throw new NotImplementedException();
+        }
+
+
+        public override void OnDraw(GeometryBuilder dc)
+        {
+            dc.Clear();
+
+            //dc.DrawArc(,);
+
+
+            //DbCircArc dbArc = new DbCircArc();
+            //dbArc.Radius = 20000;
+            //dbArc.Center = new Point3d(0,0,0);
+
+            //dbArc.DbEntity.AddToCurrentDocument();
+        }
+    }
+}
