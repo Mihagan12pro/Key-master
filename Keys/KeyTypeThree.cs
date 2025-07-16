@@ -156,12 +156,12 @@ namespace Key_master.Keys
 
         public override hresult OnMcDeserialization(McSerializationInfo info)
         {
-            if (!info.GetValue("point1", out point1) || !info.GetValue("point2", out point2) || !info.GetValue("center", out center) || !info.GetValue(nameof(arc1Center), out arc1Center))
+            if (info.GetValue(nameof(arc1Center), out arc1Center) && base.OnMcDeserialization(info) == hresult.s_Ok)
             {
-                return hresult.e_Fail;
+                return hresult.s_Ok;
             }
 
-            return hresult.s_Ok;
+            return hresult.e_Fail;
         }
 
 
