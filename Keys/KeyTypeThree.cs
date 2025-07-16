@@ -1,13 +1,7 @@
 ﻿using Multicad;
 using Multicad.CustomObjectBase;
-using Multicad.DatabaseServices.StandardObjects;
 using Multicad.Geometry;
 using Multicad.Runtime;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Key_master.Keys
 {
@@ -81,7 +75,16 @@ namespace Key_master.Keys
 
         protected override void Displace(KeyBasic obj, Point3d grip, Vector3d offset)
         {
-           // throw new NotImplementedException();
+            if (obj.TryModify())
+            {
+                if (grip == obj.Center)
+                {
+                    obj.Center += offset;
+                    obj.Point1 += offset;
+                    obj.Point2 += offset;
+                    (obj as KeyTypeThree).Arc1Center += offset;
+                }
+            }
         }
 
 
@@ -123,40 +126,21 @@ namespace Key_master.Keys
         {
             info.AppendGrip
                 (
-                    new McSmartGrip<KeyTypeTwo>
+                    new McSmartGrip<KeyTypeThree>
                         (
 
-                            point1,
+                            center,
 
                             (obj, grip, offset) =>
                             {
 
                                 //obj.Point1 += offset;
-                                Scale(obj, obj.Point1, offset);
+                                Displace(obj, center, offset);
 
                             }
 
                         )
-                );//Точка справа
-
-
-            //info.AppendGrip
-            //    (
-            //        new McSmartGrip<KeyTypeTwo>
-            //            (
-
-            //                new Point3d(point2.X, point1.Y,0),
-
-            //                (obj, grip, offset) =>
-            //                {
-
-            //                    //obj.Point2 += offset;
-            //                    Scale(obj, new Point3d(point2.X, point1.Y, 0), offset);
-
-            //                }
-
-            //            )
-            //    );
+                );
 
             return true;
         }
@@ -172,8 +156,10 @@ namespace Key_master.Keys
 
         public override hresult OnMcDeserialization(McSerializationInfo info)
         {
-            if (base.OnMcDeserialization(info) == hresult.e_Fail || info.GetValue(nameof(arc1Center), out arc1Center))
+            if (!info.GetValue("point1", out point1) || !info.GetValue("point2", out point2) || !info.GetValue("center", out center) || !info.GetValue(nameof(arc1Center), out arc1Center))
+            {
                 return hresult.e_Fail;
+            }
 
             return hresult.s_Ok;
         }
@@ -183,7 +169,7 @@ namespace Key_master.Keys
         {
             base.OnTransform(tfm);
 
-            arc1Center = arc1Center = new Point3d(point1.X, point1.Y / 2, 0);
+            arc1Center = new Point3d(point1.X, point1.Y / 2, 0);
         }
 
 
