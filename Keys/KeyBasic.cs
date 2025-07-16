@@ -4,6 +4,7 @@ using Multicad.CustomObjectBase;
 using Multicad.DatabaseServices;
 using Multicad.Geometry;
 using Multicad.Runtime;
+using Multicad.Wpf.Dialogs;
 using System.Globalization;
 
 namespace Key_master.Keys
@@ -64,6 +65,7 @@ namespace Key_master.Keys
             EditWindow window = new EditWindow(Width, Length);
             window.Title += $" (исполнение {KeyType})";
 
+           
 
             window.ShowDialog();
             if (window.DialogResult == true)
