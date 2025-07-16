@@ -3,6 +3,7 @@ using Multicad;
 using Multicad.CustomObjectBase;
 using Multicad.DatabaseServices;
 using Multicad.Geometry;
+using Multicad.Runtime;
 using System.Globalization;
 
 namespace Key_master.Keys
@@ -126,6 +127,27 @@ namespace Key_master.Keys
             Length = length;
 
             DbEntity.Update();
+
+            return hresult.s_Ok;
+        }
+
+
+        public override hresult OnMcSerialization(McSerializationInfo info)
+        {
+            info.Add("point1", point1);
+            info.Add("point2", point2);
+            info.Add("center", center);
+
+            return hresult.s_Ok;
+        }
+
+
+        public override hresult OnMcDeserialization(McSerializationInfo info)
+        {
+            if (!info.GetValue("point1", out point1) || !info.GetValue("point2", out point2) || !info.GetValue("center", out center))
+            {
+                return hresult.e_Fail;
+            }
 
             return hresult.s_Ok;
         }

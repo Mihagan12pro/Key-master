@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace Key_master.Keys
 {
-    [CustomEntity("1C925FA1-842B-49CD-924F-4ABF9717DB62", "Key", "Key Entity")]
+    [CustomEntity("1C925FA1-842B-49CD-924F-4ABF9717DB62", "Key2", "Key Type 2 Entity")]
     internal class KeyTypeTwo : KeyBasic
     {
         public override double Width
@@ -49,6 +49,7 @@ namespace Key_master.Keys
             {
                 if (TryModify())
                 {
+                    point1 = new Point3d(center.X + value * 0.5 -  Width * 0.5, center.Y + Width * 0.5, 0);
                     point1 = new Point3d(center.X + value * 0.5, center.Y + Width * 0.5, 0);
                     point2 = new Point3d(center.X - value * 0.5, center.Y - Width * 0.5, 0);
 
@@ -63,27 +64,6 @@ namespace Key_master.Keys
             dc.Clear();
 
             dc.DrawPolyline(new Point3d[] { point1, new Point3d(point1.X, point2.Y, 0), point2, new Point3d(point2.X, point1.Y, 0), point1 });
-        }
-
-
-        public override hresult OnMcSerialization(McSerializationInfo info)
-        {
-            info.Add("point1", point1);
-            info.Add("point2", point2);
-            info.Add("center", center);
-
-            return hresult.s_Ok;
-        }
-
-
-        public override hresult OnMcDeserialization(McSerializationInfo info)
-        {
-            if (!info.GetValue("point1", out point1) || !info.GetValue("point2", out point2) || !info.GetValue("center", out center))
-            {
-                return hresult.e_Fail;
-            }
-
-            return hresult.s_Ok;
         }
 
 

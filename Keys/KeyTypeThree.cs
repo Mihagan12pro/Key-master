@@ -1,6 +1,7 @@
 ﻿using Multicad.CustomObjectBase;
 using Multicad.DatabaseServices.StandardObjects;
 using Multicad.Geometry;
+using Multicad.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Key_master.Keys
 {
+    [CustomEntity("1C925FA1-842B-49CD-924F-4ABF9717DB63", "Key3", "Key Type 3 Entity")]
     internal class KeyTypeThree : KeyBasic
     {
         public override double Width 
@@ -72,14 +74,54 @@ namespace Key_master.Keys
         {
             dc.Clear();
 
-            //dc.DrawArc(,);
+            dc.DrawPolyline(new Point3d[] { point1, new Point3d(point1.X, point2.Y, 0), point2, new Point3d(point2.X, point1.Y, 0) });
+
+            Point3d point3 = new Point3d(point2.X, point1.Y, 0);
+
+            dc.DrawArc(new Point3d((point1.X + point3.X) / 2, point1.Y, 0), Width / 2,  0, 3.14159);
+        }
 
 
-            //DbCircArc dbArc = new DbCircArc();
-            //dbArc.Radius = 20000;
-            //dbArc.Center = new Point3d(0,0,0);
+        public override bool GetGripPoints(GripPointsInfo info)
+        {
+            info.AppendGrip
+                (
+                    new McSmartGrip<KeyTypeTwo>
+                        (
 
-            //dbArc.DbEntity.AddToCurrentDocument();
+                            point1,
+
+                            (obj, grip, offset) =>
+                            {
+
+                                //obj.Point1 += offset;
+                                Scale(obj, obj.Point1, offset);
+
+                            }
+
+                        )
+                );//Точка справа
+
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<KeyTypeTwo>
+                        (
+
+                            new Point3d(point2.X, point1.Y,0),
+
+                            (obj, grip, offset) =>
+                            {
+
+                                //obj.Point2 += offset;
+                                Scale(obj, new Point3d(point2.X, point1.Y, 0), offset);
+
+                            }
+
+                        )
+                );
+
+            return true;
         }
     }
 }
