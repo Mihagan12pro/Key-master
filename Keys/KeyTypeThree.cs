@@ -1,4 +1,5 @@
-﻿using Multicad.CustomObjectBase;
+﻿using Multicad;
+using Multicad.CustomObjectBase;
 using Multicad.DatabaseServices.StandardObjects;
 using Multicad.Geometry;
 using Multicad.Runtime;
@@ -39,6 +40,7 @@ namespace Key_master.Keys
                     point2 = new Point3d(center.X -  (Length - ArcRadius) * 0.5, center.Y - ArcRadius, 0);
 
                     center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
+                    arc1Center = new Point3d(point1.X, point1.Y / 2, 0);
                 }
             }
         }
@@ -62,9 +64,20 @@ namespace Key_master.Keys
                     point2 = new Point3d(center.X - (value - ArcRadius) * 0.5, center.Y - ArcRadius, 0);
 
                     center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
+                    arc1Center = new Point3d(point1.X, (point1.Y + point2.Y) / 2, 0);
                 }
             }
         }
+
+
+        protected Point3d arc1Center;
+        public Point3d Arc1Center
+        {
+            get => arc1Center;
+
+            set => arc1Center = value;
+        }
+
 
         protected override void Displace(KeyBasic obj, Point3d grip, Vector3d offset)
         {
@@ -100,7 +113,9 @@ namespace Key_master.Keys
 
             Point3d point3 = new Point3d(point2.X, point1.Y, 0);
 
-           // dc.DrawArc(new Point3d((point1.X + point3.X) / 2, point1.Y, 0), Width / 2,  0, 3.14159);
+
+            //Console.WriteLine($"{arc1Center.X}, {arc1Center.Y}, {arc1Center.Z}");
+            dc.DrawArc(arc1Center, ArcRadius, 4.71239, 1.5708);
         }
 
 
@@ -125,25 +140,50 @@ namespace Key_master.Keys
                 );//Точка справа
 
 
-            info.AppendGrip
-                (
-                    new McSmartGrip<KeyTypeTwo>
-                        (
+            //info.AppendGrip
+            //    (
+            //        new McSmartGrip<KeyTypeTwo>
+            //            (
 
-                            new Point3d(point2.X, point1.Y,0),
+            //                new Point3d(point2.X, point1.Y,0),
 
-                            (obj, grip, offset) =>
-                            {
+            //                (obj, grip, offset) =>
+            //                {
 
-                                //obj.Point2 += offset;
-                                Scale(obj, new Point3d(point2.X, point1.Y, 0), offset);
+            //                    //obj.Point2 += offset;
+            //                    Scale(obj, new Point3d(point2.X, point1.Y, 0), offset);
 
-                            }
+            //                }
 
-                        )
-                );
+            //            )
+            //    );
 
             return true;
+        }
+
+
+        public override hresult OnMcSerialization(McSerializationInfo info)
+        {
+            info.Add(nameof(arc1Center), arc1Center);
+
+            return base.OnMcSerialization(info);
+        }
+
+
+        public override hresult OnMcDeserialization(McSerializationInfo info)
+        {
+            if (base.OnMcDeserialization(info) == hresult.e_Fail || info.GetValue(nameof(arc1Center), out arc1Center))
+                return hresult.e_Fail;
+
+            return hresult.s_Ok;
+        }
+
+
+        public override void OnTransform(Matrix3d tfm)
+        {
+            base.OnTransform(tfm);
+
+            arc1Center = arc1Center = new Point3d(point1.X, point1.Y / 2, 0);
         }
 
 

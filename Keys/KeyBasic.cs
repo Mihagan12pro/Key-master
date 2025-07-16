@@ -65,8 +65,6 @@ namespace Key_master.Keys
             EditWindow window = new EditWindow(Width, Length);
             window.Title += $" (исполнение {KeyType})";
 
-           
-
             window.ShowDialog();
             if (window.DialogResult == true)
             {
@@ -152,6 +150,19 @@ namespace Key_master.Keys
             }
 
             return hresult.s_Ok;
+        }
+
+
+        public override void OnTransform(Matrix3d tfm)
+        {
+            if (!TryModify())
+                return;
+
+            point1 = point1.TransformBy(tfm);
+
+            point2 = point1.TransformBy(tfm);
+
+            center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
         }
     }
 }

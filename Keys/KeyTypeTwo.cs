@@ -67,19 +67,6 @@ namespace Key_master.Keys
         }
 
 
-        public override void OnTransform(Matrix3d tfm)
-        {
-            if (!TryModify())
-                return;
-
-            point1 = point1.TransformBy(tfm);
-
-            point2 = point1.TransformBy(tfm);
-
-            center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
-        }
-
-
         public override bool GetGripPoints(GripPointsInfo info)
         {
             info.AppendGrip
