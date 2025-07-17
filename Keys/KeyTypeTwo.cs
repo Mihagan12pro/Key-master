@@ -4,7 +4,7 @@ using Multicad.Runtime;
 
 namespace Key_master.Keys
 {
-    [CustomEntity("1C925FA1-842B-49CD-924F-4ABF9717DB62", "Key2", "Key Type 2 Entity")]
+    [CustomEntity("1C925FA1-842B-49CD-924F-4ABF9717DB62", "Key2", "Шпоночный паз")]
     internal class KeyTypeTwo : KeyBasic
     {
         public override double Width

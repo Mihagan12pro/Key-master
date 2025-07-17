@@ -2,15 +2,17 @@
 using Multicad.CustomObjectBase;
 using Multicad.Geometry;
 using Multicad.Runtime;
+using System.ComponentModel;
 
 namespace Key_master.Keys
 {
-    [CustomEntity("1C925FA1-842B-49CD-924F-4ABF9717DB63", "Key3", "Key Type 3 Entity")]
+    [CustomEntity("1C925FA1-842B-49CD-924F-4ABF9717DB63", "Key3", "Шпоночный паз")]
     internal class KeyTypeThree : KeyBasic
     {
+        [DisplayName("Радиус дуги")]
         public double ArcRadius
         {
-            get; set;
+            get; protected set;
         }
 
 
@@ -32,8 +34,10 @@ namespace Key_master.Keys
                 {
                     Point3d oldCenter = center;
 
-                    Point1 = new Point3d(oldCenter.X + (Length - ArcRadius) * 0.5, oldCenter.Y + ArcRadius, 0);
-                    Point2 = new Point3d(oldCenter.X - (Length - ArcRadius) * 0.5, oldCenter.Y - ArcRadius, 0);
+                    double length = Length;
+
+                    Point1 = new Point3d(oldCenter.X + (length - ArcRadius) * 0.5, oldCenter.Y + ArcRadius, 0);
+                    Point2 = new Point3d(oldCenter.X - (length - ArcRadius) * 0.5, oldCenter.Y - ArcRadius, 0);
                 }
             }
         }
@@ -83,8 +87,8 @@ namespace Key_master.Keys
                {
                     point1 = value;
 
-                    center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
                     arc1Center = new Point3d(point1.X, (point1.Y + point2.Y) / 2, 0);
+                    center = new Point3d((arc1Center.X + Point2.X) * 0.5, arc1Center.Y, 0);
                 }
             }
         }
@@ -102,8 +106,8 @@ namespace Key_master.Keys
                 {
                     point2 = value;
 
-                    center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
-                    arc1Center = new Point3d(point1.X, (point1.Y + point2.Y)/ 2, 0);
+                    arc1Center = new Point3d(point1.X, (point1.Y + point2.Y) / 2, 0);
+                    center = new Point3d( (arc1Center.X + Point2.X) * 0.5, arc1Center.Y, 0);
                 }
             }
         }
@@ -128,6 +132,8 @@ namespace Key_master.Keys
                 );
 
             dc.DrawArc(arc1Center, ArcRadius, 4.71239, 1.5708);
+
+            //CircArc3d arc = new CircArc3d(arc1Center, ArcRadius, 4.71239, 1.5708,);
         }
 
 

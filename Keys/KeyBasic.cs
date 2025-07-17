@@ -3,6 +3,7 @@ using Multicad;
 using Multicad.CustomObjectBase;
 using Multicad.DatabaseServices;
 using Multicad.Geometry;
+using System.ComponentModel;
 using System.Globalization;
 
 namespace Key_master.Keys
@@ -12,6 +13,7 @@ namespace Key_master.Keys
         protected Point3d center, point1, point2;
 
 
+        [DisplayName("Центр шпоночного паза")]
         public Point3d Center
         {
             get => center;
@@ -26,6 +28,7 @@ namespace Key_master.Keys
         public abstract Point3d Point2 { get; set; }
 
 
+        [DisplayName("Исполнение")]
         public string ?KeyType { get; protected set; }
 
 
@@ -144,5 +147,17 @@ namespace Key_master.Keys
 
             Point2 = point1.TransformBy(tfm);
         }
+
+
+        [DisplayName("Координата X центра")]
+        public double Xc { get => Center.X; }
+
+
+        [DisplayName("Координата Y центра")]
+        public double Yc { get => Center.Y; }
+
+
+        [DisplayName("Координата Z центра")]
+        public double Zc { get => Center.Z; }
     }
 }
