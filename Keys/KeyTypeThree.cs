@@ -34,10 +34,8 @@ namespace Key_master.Keys
                 {
                     Point3d oldCenter = center;
 
-                    double length = Length;
-
-                    Point1 = new Point3d(oldCenter.X + (length - ArcRadius) * 0.5, oldCenter.Y + ArcRadius, 0);
-                    Point2 = new Point3d(oldCenter.X - (length - ArcRadius) * 0.5, oldCenter.Y - ArcRadius, 0);
+                    Point1 = new Point3d(oldCenter.X + (Length - ArcRadius) * 0.5, oldCenter.Y + ArcRadius, 0);
+                    Point2 = new Point3d(oldCenter.X - (Length - ArcRadius) * 0.5, oldCenter.Y - ArcRadius, 0);
                 }
             }
         }
@@ -88,7 +86,7 @@ namespace Key_master.Keys
                     point1 = value;
 
                     arc1Center = new Point3d(point1.X, (point1.Y + point2.Y) / 2, 0);
-                    center = new Point3d((arc1Center.X + Point2.X) * 0.5, arc1Center.Y, 0);
+                    center = new Point3d((Point2.X + Length / 2), arc1Center.Y, 0);
                 }
             }
         }
@@ -107,7 +105,7 @@ namespace Key_master.Keys
                     point2 = value;
 
                     arc1Center = new Point3d(point1.X, (point1.Y + point2.Y) / 2, 0);
-                    center = new Point3d( (arc1Center.X + Point2.X) * 0.5, arc1Center.Y, 0);
+                    center = new Point3d((Point2.X + Length / 2), arc1Center.Y, 0);
                 }
             }
         }
@@ -132,8 +130,6 @@ namespace Key_master.Keys
                 );
 
             dc.DrawArc(arc1Center, ArcRadius, 4.71239, 1.5708);
-
-            //CircArc3d arc = new CircArc3d(arc1Center, ArcRadius, 4.71239, 1.5708,);
         }
 
 
