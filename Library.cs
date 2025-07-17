@@ -39,7 +39,7 @@ namespace Key_master
                     break;
 
                 default:
-                    key = new KeyTypeTwo();
+                    key = new KeyTypeThree();
                     break;
             }
 

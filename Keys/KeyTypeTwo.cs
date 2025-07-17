@@ -1,11 +1,6 @@
-﻿using Key_master.WPF.Views;
-using Multicad;
-using Multicad.CustomObjectBase;
-using Multicad.DatabaseServices;
+﻿using Multicad.CustomObjectBase;
 using Multicad.Geometry;
 using Multicad.Runtime;
-using System.Globalization;
-using System.Windows;
 
 namespace Key_master.Keys
 {
@@ -28,8 +23,8 @@ namespace Key_master.Keys
                 {
                     Point3d oldCenter = center;
 
-                    point1 = new Point3d(oldCenter.X + Length * 0.5, oldCenter.Y + value * 0.5, 0);
-                    point2 = new Point3d(oldCenter.X - Length * 0.5, oldCenter.Y - value * 0.5, 0);
+                    Point1 = new Point3d(oldCenter.X + Length * 0.5, oldCenter.Y + value * 0.5, 0);
+                    Point2 = new Point3d(oldCenter.X - Length * 0.5, oldCenter.Y - value * 0.5, 0);
                 }
             }
         }
@@ -51,8 +46,8 @@ namespace Key_master.Keys
                 {
                     Point3d oldCenter = center;
 
-                    point1 = new Point3d(oldCenter.X + value * 0.5, oldCenter.Y + Width * 0.5, 0);
-                    point2 = new Point3d(oldCenter.X - value * 0.5, oldCenter.Y - Width * 0.5, 0);
+                    Point1 = new Point3d(oldCenter.X + value * 0.5, oldCenter.Y + Width * 0.5, 0);
+                    Point2 = new Point3d(oldCenter.X - value * 0.5, oldCenter.Y - Width * 0.5, 0);
                 }
             }
         }
