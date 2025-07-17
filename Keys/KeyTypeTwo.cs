@@ -26,10 +26,10 @@ namespace Key_master.Keys
             {
                 if (TryModify())
                 {
-                    point1 = new Point3d(center.X + Length * 0.5, center.Y + value * 0.5, 0);
-                    point2 = new Point3d(center.X - Length * 0.5, center.Y - value * 0.5, 0);
+                    Point3d oldCenter = center;
 
-                    center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
+                    point1 = new Point3d(oldCenter.X + Length * 0.5, oldCenter.Y + value * 0.5, 0);
+                    point2 = new Point3d(oldCenter.X - Length * 0.5, oldCenter.Y - value * 0.5, 0);
                 }
             }
         }
@@ -49,9 +49,43 @@ namespace Key_master.Keys
             {
                 if (TryModify())
                 {
-                    point1 = new Point3d(center.X + value * 0.5 -  Width * 0.5, center.Y + Width * 0.5, 0);
-                    point1 = new Point3d(center.X + value * 0.5, center.Y + Width * 0.5, 0);
-                    point2 = new Point3d(center.X - value * 0.5, center.Y - Width * 0.5, 0);
+                    Point3d oldCenter = center;
+
+                    point1 = new Point3d(oldCenter.X + value * 0.5, oldCenter.Y + Width * 0.5, 0);
+                    point2 = new Point3d(oldCenter.X - value * 0.5, oldCenter.Y - Width * 0.5, 0);
+                }
+            }
+        }
+
+        public override Point3d Point1 
+        { 
+            get
+            {
+                return point1;
+            }
+            set
+            {
+                if (TryModify())
+                {
+                    point1 = value;
+
+                    center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
+                }
+            }
+        }
+
+
+        public override Point3d Point2 
+        {
+            get
+            {
+                return point2;
+            }
+            set
+            {
+                if (TryModify())
+                {
+                    point2 = value;
 
                     center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
                 }
@@ -75,7 +109,12 @@ namespace Key_master.Keys
                        (
                            center,
 
-                           (obj, grip, offset) => Displace(obj, center, offset)
+                           (obj, grip, offset) => {
+
+                               obj.Point1 += offset;
+                               obj.Point2 += offset;
+
+                           }
                        )
                );
 
@@ -88,8 +127,9 @@ namespace Key_master.Keys
                             point1,
 
                             (obj, grip, offset) => { 
-                                obj.TryModify(); obj.Point1 += offset; 
-                                Scale(obj, obj.Point1, offset); 
+                                
+                                obj.Point1 += offset; 
+                            
                             }
 
                         )
@@ -106,7 +146,6 @@ namespace Key_master.Keys
                             (obj, grip, offset) => {
 
                                 obj.Point2 += offset; 
-                                Scale(obj, obj.Point2, offset); 
 
                             }
 
@@ -126,7 +165,6 @@ namespace Key_master.Keys
 
                                 obj.Point1 = new Point3d(obj.Point1.X + offset.X, obj.Point1.Y, 0);
                                 obj.Point2 = new Point3d(obj.Point2.X, obj.Point2.Y + offset.Y, 0); 
-                                Scale(obj, new Point3d(obj.Point1.X, obj.Point2.Y, 0), offset); 
 
                             }
 
@@ -146,7 +184,6 @@ namespace Key_master.Keys
 
                                 obj.Point1 = new Point3d(obj.Point1.X, obj.Point1.Y + offset.Y, 0);
                                 obj.Point2 = new Point3d(obj.Point2.X + offset.X, obj.Point2.Y, 0); 
-                                Scale(obj, new Point3d(obj.Point2.X, obj.Point1.Y, 0), offset); 
 
                             }
 
@@ -164,7 +201,6 @@ namespace Key_master.Keys
                             (obj, grip, offset) => {
 
                                 obj.Point1 = new Point3d(obj.Point1.X + offset.X, obj.Point1.Y, 0);
-                                Scale(obj, new Point3d(obj.Point1.X, obj.Center.Y, 0), offset);
 
                             }
                         
@@ -183,7 +219,6 @@ namespace Key_master.Keys
                             (obj, grip, offset) => {
 
                                 obj.Point2 = new Point3d(obj.Point2.X + offset.X, obj.Point2.Y, 0);
-                                Scale(obj, new Point3d(obj.Point2.X, obj.Center.Y, 0), offset); 
 
                             }
 
@@ -201,7 +236,6 @@ namespace Key_master.Keys
                             (obj, grip, offset) => {
 
                                 obj.Point1 = new Point3d(obj.Point1.X, offset.Y + obj.Point1.Y, 0);
-                                Scale(obj, new Point3d(obj.Center.X, obj.Point1.Y, 0), offset); 
                             
                             }
 
@@ -220,7 +254,6 @@ namespace Key_master.Keys
                             (obj, grip, offset) => {
 
                                 obj.Point2 = new Point3d(obj.Point2.X, offset.Y + obj.Point2.Y, 0);
-                                Scale(obj, new Point3d(obj.Center.X, obj.Point2.Y, 0), offset); 
                             
                             }
 
@@ -228,27 +261,6 @@ namespace Key_master.Keys
                 );
 
             return true;
-        }
-
-
-        protected override void Scale(KeyBasic obj, Point3d grip, Vector3d offset)
-        {
-            if (obj.TryModify())
-                obj.Center = new Point3d((obj.Point1.X + obj.Point2.X) / 2, (obj.Point1.Y + obj.Point2.Y) / 2, (obj.Point1.Z + obj.Point2.Z) / 2);
-        }
-
-
-        protected override void Displace(KeyBasic obj, Point3d grip, Vector3d offset)
-        {
-            if (obj.TryModify())
-            {
-                if (grip == obj.Center)
-                {
-                    obj.Center += offset;
-                    obj.Point1 += offset;
-                    obj.Point2 += offset;
-                }
-            }
         }
 
 

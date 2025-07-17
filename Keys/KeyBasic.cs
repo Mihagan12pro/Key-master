@@ -3,8 +3,6 @@ using Multicad;
 using Multicad.CustomObjectBase;
 using Multicad.DatabaseServices;
 using Multicad.Geometry;
-using Multicad.Runtime;
-using Multicad.Wpf.Dialogs;
 using System.Globalization;
 
 namespace Key_master.Keys
@@ -22,20 +20,10 @@ namespace Key_master.Keys
         }
 
 
-        public Point3d Point1
-        {
-            get => point1;
-
-            set => point1 = value;
-        }
+        public abstract Point3d Point1 { get; set; }
 
 
-        public Point3d Point2
-        {
-            get => point2;
-
-            set => point2 = value;
-        }
+        public abstract Point3d Point2 { get; set; }
 
 
         public string ?KeyType { get; protected set; }
@@ -45,12 +33,6 @@ namespace Key_master.Keys
         
         
         public abstract double Length { get; set; }
-
-
-        protected abstract void Scale(KeyBasic obj, Point3d grip, Vector3d offset);
-
-
-        protected abstract void Displace(KeyBasic obj, Point3d grip, Vector3d offset);
 
 
         public bool TryModify()
@@ -158,11 +140,9 @@ namespace Key_master.Keys
             if (!TryModify())
                 return;
 
-            point1 = point1.TransformBy(tfm);
+            Point1 = point1.TransformBy(tfm);
 
-            point2 = point1.TransformBy(tfm);
-
-            center = new Point3d((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2, (point1.Z + point2.Z) / 2);
+            Point2 = point1.TransformBy(tfm);
         }
     }
 }

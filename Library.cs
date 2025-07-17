@@ -3,9 +3,6 @@ using Multicad.DatabaseServices;
 using Multicad.DatabaseServices.StandardObjects;
 using Multicad.Geometry;
 using Multicad.Runtime;
-using Multicad.Wpf;
-using Multicad.Wpf.Dialogs;
-using Multicad.Wpf.Extensions;
 
 namespace Key_master
 {
@@ -42,7 +39,7 @@ namespace Key_master
                     break;
 
                 default:
-                    key = new KeyTypeThree();
+                    key = new KeyTypeTwo();
                     break;
             }
 
