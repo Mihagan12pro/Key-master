@@ -28,7 +28,7 @@ namespace Key_master.Keys
             }
             set
             {
-                ArcRadius = value * 0.5;
+                 ArcRadius = value * 0.5;
 
                 if (TryModify())
                 {
@@ -69,7 +69,12 @@ namespace Key_master.Keys
         {
             get => arc1Center;
 
-            set => arc1Center = value;
+            set
+            {
+                arc1Center = value;
+
+                ArcRadius = Width / 2;
+            }
         }
 
 
@@ -85,8 +90,21 @@ namespace Key_master.Keys
                {
                     point1 = value;
 
-                    arc1Center = new Point3d(point1.X, (point1.Y + point2.Y) / 2, 0);
-                    center = new Point3d((Point2.X + Length / 2), arc1Center.Y, 0);
+                    
+                    Arc1Center = new Point3d(point1.X, (point1.Y + point2.Y) / 2, 0);
+
+                    double x;
+
+                    if (point1.X > point2.X)
+                    {
+                        x = (Point2.X + Length / 2);
+                    }
+                    else
+                    {
+                        x = (Point1.X + Length / 2);
+                    }
+
+                    center = new Point3d(x, arc1Center.Y, 0);
                 }
             }
         }
@@ -104,8 +122,22 @@ namespace Key_master.Keys
                 {
                     point2 = value;
 
-                    arc1Center = new Point3d(point1.X, (point1.Y + point2.Y) / 2, 0);
-                    center = new Point3d((Point2.X + Length / 2), arc1Center.Y, 0);
+                   
+                    Arc1Center = new Point3d(point1.X, (point1.Y + point2.Y) / 2, 0);
+                   
+
+                    double x;
+
+                    if (point1.X > point2.X)
+                    {
+                        x = (Point2.X + Length / 2);
+                    }
+                    else
+                    {
+                        x = (Point1.X + Length / 2);
+                    }
+
+                    center = new Point3d(x, arc1Center.Y, 0);
                 }
             }
         }
@@ -114,6 +146,7 @@ namespace Key_master.Keys
         public override void OnDraw(GeometryBuilder dc)
         {
             dc.Clear();
+
 
             dc.DrawPolyline
                 (
@@ -125,31 +158,21 @@ namespace Key_master.Keys
 
                         new Point3d(point2.X, point1.Y, 0),
 
-                        point1
+                        point1,
                     }
                 );
 
-            dc.DrawArc(arc1Center, ArcRadius, 4.71239, 1.5708);
+            if (point1.X > point2.X)
+            {
+                dc.DrawArc(arc1Center, ArcRadius, 4.71239, 1.5708);
+                return;
+            }
+            dc.DrawArc(arc1Center, ArcRadius, 1.5708, 4.71239 );
         }
 
 
         public override bool GetGripPoints(GripPointsInfo info)
         {
-            info.AppendGrip
-              (
-                  new McSmartGrip<KeyTypeTwo>
-                      (
-
-                          point1,
-
-                          (obj, grip, offset) => {
-
-                              obj.Point1 += offset;
-
-                          }
-
-                      )
-              ); 
             info.AppendGrip
                 (
                     new McSmartGrip<KeyTypeThree>
@@ -166,6 +189,43 @@ namespace Key_master.Keys
                             }
 
                         )
+                );
+
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<KeyTypeThree>
+                        (
+
+                            point1,
+
+                            (obj, grip, offset) => {
+
+                                obj.Point1 += offset;
+
+                            }
+
+                        )
+                );
+
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<KeyTypeThree>
+                        (
+
+                            new Point3d(point1.X, point2.Y, 0),
+
+                            
+                            (obj, grip, offset) => {
+
+                                obj.Point1 = new Point3d(obj.Point1.X + offset.X, obj.Point1.Y, 0);
+                                obj.Point2 = new Point3d(obj.Point2.X, obj.Point2.Y + offset.Y, 0);
+
+                            }
+
+                        )
+
                 );
 
             return true;

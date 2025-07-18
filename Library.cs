@@ -3,6 +3,7 @@ using Multicad.DatabaseServices;
 using Multicad.DatabaseServices.StandardObjects;
 using Multicad.Geometry;
 using Multicad.Runtime;
+using Multicad.Wpf;
 
 namespace Key_master
 {
@@ -24,7 +25,6 @@ namespace Key_master
                 if (value >= 1 && value <= 3)
                     break;
             }
-
 
             KeyBasic key;
 

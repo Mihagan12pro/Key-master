@@ -5,6 +5,7 @@ using Multicad.DatabaseServices;
 using Multicad.Geometry;
 using System.ComponentModel;
 using System.Globalization;
+using HostMgd.ApplicationServices;
 
 namespace Key_master.Keys
 {
@@ -41,30 +42,31 @@ namespace Key_master.Keys
         public bool TryModify()
         {
             TryModify(0);
+
             return true;
         }
 
 
         public override hresult OnEdit(Point3d pnt, EditFlags lFlag)
         {
-            EditWindow window = new EditWindow(Width, Length);
-            window.Title += $" (исполнение {KeyType})";
+            EditWindow editWindow = new EditWindow(Width, Length);
+            editWindow.Title += $" (исполнение {KeyType})";
 
-            window.ShowDialog();
-            if (window.DialogResult == true)
+
+            if (Application.ShowModalWindow(editWindow) == true)
             {
                 double width, length;
 
-                if (!double.TryParse(window.WidthTB.Text, out width))
+                if (!double.TryParse(editWindow.WidthTB.Text, out width))
                 {
-                    double.TryParse(window.WidthTB.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out width);
+                    double.TryParse(editWindow.WidthTB.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out width);
                 }
                 Width = width;
 
 
-                if (!double.TryParse(window.LengthTB.Text, out length))
+                if (!double.TryParse(editWindow.LengthTB.Text, out length))
                 {
-                    double.TryParse(window.LengthTB.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out length);
+                    double.TryParse(editWindow.LengthTB.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out length);
                 }
                 Length = length;
             }
