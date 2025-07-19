@@ -66,7 +66,73 @@ namespace Key_master.Keys
             dc.Clear();
 
 
-            dc.DrawPolyline(new Point3d[] { point1, point2 });
+            dc.DrawPolyline
+            (
+                new Point3d[]
+                {
+                   new Point3d(point1.X, point2.Y, 0),
+
+                   point2,
+
+                   new Point3d(point2.X, point1.Y, 0),
+
+                   point1,
+                }
+            );
+
+            Point3d arcCenter = new Point3d(point1.X, center.Y,0);
+            double startAngle, endAngle;
+
+            if (point1.X < point2.X)
+            {
+                startAngle = 1.57;
+                endAngle = 4.71;
+            }
+            else
+            {
+                startAngle = 4.71;
+                endAngle = 1.57;
+            }
+
+            dc.DrawArc(arcCenter, radius, startAngle, endAngle);
+        }
+
+
+        public override bool GetGripPoints(GripPointsInfo info)
+        {
+            info.AppendGrip
+               (
+                   new McSmartGrip<KeyTypeThree>
+                       (
+                           point1,
+
+                           (obj, grip, offset) =>
+                           {
+
+                               obj.Point1 += offset;
+                               obj.Point2 += offset;
+
+                           }
+                       )
+               );
+
+            //info.AppendGrip
+            //   (
+            //       new McSmartGrip<KeyTypeThree>
+            //           (
+            //               point2,
+
+            //               (obj, grip, offset) =>
+            //               {
+
+            //                   obj.Point1 += offset;
+            //                   obj.Point2 += offset;
+
+            //               }
+            //           )
+            //   );
+
+            return true;
         }
 
 
