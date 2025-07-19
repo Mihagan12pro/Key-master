@@ -19,7 +19,7 @@ namespace Key_master.Keys
         {
             get => center;
 
-            set => center = value;
+            set { if (TryModify()) center = value; }
         }
 
 
@@ -108,7 +108,7 @@ namespace Key_master.Keys
             if (result.Result == InputResult.ResultCode.Cancel)
                 return hresult.e_Abort;
 
-            center = result.Point;
+            Center = result.Point;
 
             Width = width;
             Length = length;
