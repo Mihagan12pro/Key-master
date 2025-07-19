@@ -10,7 +10,7 @@ namespace Key_master.Keys
         protected double radius;
 
 
-        public override Point3d Point1 
+        public override Point3d Point1
         {
             get => point1;
             set => point1 = value;
@@ -24,11 +24,11 @@ namespace Key_master.Keys
         }
 
 
-        public override double Width 
+        public override double Width
         {
             get
             {
-                Point3d point3 = new Point3d(point1.X, point2.Y,0);
+                Point3d point3 = new Point3d(point1.X, point2.Y, 0);
 
                 return new Vector3d(point1.X - point3.X, point1.Y - point3.Y, 0).Length;
             }
@@ -39,11 +39,13 @@ namespace Key_master.Keys
                 double lengthWithoutArc = Length - radius;
                 Point1 = new Point3d(center.X - lengthWithoutArc * 0.5, center.Y - radius, 0);
                 Point2 = new Point3d(center.X + lengthWithoutArc * 0.5, center.Y + radius, 0);
+
+                center = new Point3d(point2.X - Length / 2, (point1.Y + point2.Y) * 0.5, 0);
             }
         }
 
 
-        public override double Length 
+        public override double Length
         {
             get
             {
@@ -56,7 +58,9 @@ namespace Key_master.Keys
             {
                 double lengthWithoutArc = value - radius;
                 Point1 = new Point3d(center.X - lengthWithoutArc * 0.5, center.Y - radius, 0);
-                Point2 = new Point3d(center.X + lengthWithoutArc * 0.5, center.Y + radius, 0);
+                Point2 = new Point3d(center.X + lengthWithoutArc * 0.5, center.Y + radius, 0);;
+
+                center = new Point3d(point2.X - Length / 2, (point1.Y + point2.Y) * 0.5, 0);
             }
         }
 
@@ -80,7 +84,7 @@ namespace Key_master.Keys
                 }
             );
 
-            Point3d arcCenter = new Point3d(point1.X, center.Y,0);
+            Point3d arcCenter = new Point3d(point1.X, center.Y, 0);
             double startAngle, endAngle;
 
             if (point1.X < point2.X)
@@ -104,13 +108,14 @@ namespace Key_master.Keys
                (
                    new McSmartGrip<KeyTypeThree>
                        (
-                           point1,
+                           center,
 
                            (obj, grip, offset) =>
                            {
 
                                obj.Point1 += offset;
                                obj.Point2 += offset;
+                               obj.Center += offset;
 
                            }
                        )
@@ -141,6 +146,6 @@ namespace Key_master.Keys
             KeyType = "3";
         }
 
-     
+
     }
 }
