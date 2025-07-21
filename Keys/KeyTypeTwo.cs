@@ -1,4 +1,5 @@
-﻿using Multicad.CustomObjectBase;
+﻿using Multicad;
+using Multicad.CustomObjectBase;
 using Multicad.Geometry;
 using Multicad.Runtime;
 
@@ -286,8 +287,8 @@ namespace Key_master.Keys
         {
             DbEntity.AddToCurrentDocument();
 
-            Width = width;
-            Length = length;
+            point1 = new Point3d(center.X + length * 0.5, center.Y + width * 0.5, 0);
+            point2 = new Point3d(center.X - length * 0.5, center.Y - width * 0.5, 0);
 
             DbEntity.Update();
         }

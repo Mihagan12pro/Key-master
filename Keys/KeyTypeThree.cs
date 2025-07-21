@@ -189,15 +189,11 @@ namespace Key_master.Keys
             radius = width * 0.5;
 
             double lengthWithoutArc = length - radius;
-            Point1 = new Point3d(center.X - lengthWithoutArc * 0.5, center.Y - radius, 0);
-            Point2 = new Point3d(center.X + lengthWithoutArc * 0.5, center.Y + radius, 0);
+            point1 = new Point3d(center.X - lengthWithoutArc * 0.5, center.Y - radius, 0);
+            point2 = new Point3d(center.X + lengthWithoutArc * 0.5, center.Y + radius, 0);
 
-            center = new Point3d(point2.X - Length / 2, (point1.Y + point2.Y) * 0.5, 0);
-
-            Width = width;
-
+            //Width = width;
             
-
             DbEntity.Update();
         }
 
