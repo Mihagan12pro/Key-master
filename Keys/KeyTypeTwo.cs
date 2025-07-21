@@ -282,6 +282,16 @@ namespace Key_master.Keys
             return true;
         }
 
+        protected override void BuildStartGeometry(double length, double width)
+        {
+            DbEntity.AddToCurrentDocument();
+
+            Width = width;
+            Length = length;
+
+            DbEntity.Update();
+        }
+
 
         public KeyTypeTwo()
         {

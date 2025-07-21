@@ -101,8 +101,6 @@ namespace Key_master.Keys
             if (width == 0)
                 width = 50000;
 
-            DbEntity.AddToCurrentDocument();
-
             InputResult result = jig.GetPoint("Куда вставить шпоночный паз: ");
 
             if (result.Result == InputResult.ResultCode.Cancel)
@@ -110,10 +108,7 @@ namespace Key_master.Keys
 
             Center = result.Point;
 
-            Width = width;
-            Length = length;
-
-            DbEntity.Update();
+            BuildStartGeometry(length, width);
 
             return hresult.s_Ok;
         }
@@ -149,6 +144,9 @@ namespace Key_master.Keys
 
             Point2 = point1.TransformBy(tfm);
         }
+
+
+        protected abstract void BuildStartGeometry(double length, double width);
 
 
         [DisplayName("Координата X центра")]

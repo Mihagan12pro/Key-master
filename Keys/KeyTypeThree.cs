@@ -148,75 +148,57 @@ namespace Key_master.Keys
                        )
                );
 
-            //info.AppendGrip
-            //   (
-            //       new McSmartGrip<KeyTypeThree>
-            //           (
-            //               point2,
+            info.AppendGrip
+               (
+                   new McSmartGrip<KeyTypeThree>
+                       (
+                           point2,
 
-            //               (obj, grip, offset) =>
-            //               {
+                           (obj, grip, offset) =>
+                           {
 
-            //                   obj.Point1 += offset;
-            //                   obj.Point2 += offset;
+                               obj.Point2 += offset;
 
-            //               }
-            //           )
-            //   );
+                           }
+                       )
+               );
+
+            info.AppendGrip
+               (
+                   new McSmartGrip<KeyTypeThree>
+                       (
+                           point1,
+
+                           (obj, grip, offset) =>
+                           {
+
+                               obj.Point1 += offset;
+
+                           }
+                       )
+               );
 
             return true;
         }
 
 
-        public override hresult PlaceObject(PlaceFlags lInsertType)
+        protected override void BuildStartGeometry(double length, double width)
         {
-            InputJig jig = new InputJig();
-            jig.SetInputOptions(InputJig.InputReturnMode.Other);
-            jig.ForceInputNumbers = true;
-
-            InputJig.PropertyInpector.SetSource(this);
-
-
-            if (!jig.GetRealNumber("Длина шпоночного паза: ", out double length))
-                return hresult.e_Abort;
-
-            length = Math.Abs(length);
-
-            if (length == 0)
-                length = 50000;
-
-
-            if (!jig.GetRealNumber("Ширина шпоночного паза: ", out double width))
-                return hresult.e_Abort;
-
-            width = Math.Abs(width);
-
-            if (width == 0)
-                width = 50000;
-
             DbEntity.AddToCurrentDocument();
-
-            InputResult result = jig.GetPoint("Куда вставить шпоночный паз: ");
-
-            if (result.Result == InputResult.ResultCode.Cancel)
-                return hresult.e_Abort;
-
-            Center = result.Point;
-
-            //Width = width;
-            //Length = length;
 
             radius = width * 0.5;
 
-            double lengthWithoutArc = Length - radius;
+            double lengthWithoutArc = length - radius;
             Point1 = new Point3d(center.X - lengthWithoutArc * 0.5, center.Y - radius, 0);
             Point2 = new Point3d(center.X + lengthWithoutArc * 0.5, center.Y + radius, 0);
 
             center = new Point3d(point2.X - Length / 2, (point1.Y + point2.Y) * 0.5, 0);
 
-            DbEntity.Update();
+            Width = width;
 
-            return hresult.s_Ok;
+            
+
+            DbEntity.Update();
         }
 
 
