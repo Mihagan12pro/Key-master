@@ -1,4 +1,6 @@
-﻿using Multicad.CustomObjectBase;
+﻿using Multicad;
+using Multicad.CustomObjectBase;
+using Multicad.DatabaseServices;
 using Multicad.Geometry;
 using Multicad.Runtime;
 
@@ -8,6 +10,24 @@ namespace Key_master.Keys
     internal class KeyTypeThree : KeyBasic
     {
         protected double radius;
+
+
+        public override Point3d Center
+        {
+            get
+            {
+                return center;
+            }
+            set
+            {
+                if (TryModify())
+                {
+                    center = value;
+
+                    radius = Width / 2;
+                }
+            }
+        }
 
 
         public override Point3d Point1
@@ -30,17 +50,21 @@ namespace Key_master.Keys
             {
                 Point3d point3 = new Point3d(point1.X, point2.Y, 0);
 
-                return new Vector3d(point1.X - point3.X, point1.Y - point3.Y, 0).Length;
+
+
+                return point1.DistanceTo(point3);
             }
             set
             {
                 radius = value * 0.5;
 
-                double lengthWithoutArc = Length - radius;
-                Point1 = new Point3d(center.X - lengthWithoutArc * 0.5, center.Y - radius, 0);
-                Point2 = new Point3d(center.X + lengthWithoutArc * 0.5, center.Y + radius, 0);
+                Point3d oldCenter = center;
 
-                center = new Point3d(point2.X - Length / 2, (point1.Y + point2.Y) * 0.5, 0);
+                double lengthWithoutArc = Length - radius;
+                Point1 = new Point3d(oldCenter.X - lengthWithoutArc * 0.5, oldCenter.Y - radius, 0);
+                Point2 = new Point3d(oldCenter.X + lengthWithoutArc * 0.5, oldCenter.Y + radius, 0);
+
+                Center = new Point3d(point2.X - Length / 2, (point1.Y + point2.Y) * 0.5, 0);
             }
         }
 
@@ -57,10 +81,13 @@ namespace Key_master.Keys
             set
             {
                 double lengthWithoutArc = value - radius;
-                Point1 = new Point3d(center.X - lengthWithoutArc * 0.5, center.Y - radius, 0);
-                Point2 = new Point3d(center.X + lengthWithoutArc * 0.5, center.Y + radius, 0);;
 
-                center = new Point3d(point2.X - Length / 2, (point1.Y + point2.Y) * 0.5, 0);
+                Point3d oldCenter = center;
+
+                Point1 = new Point3d(oldCenter.X - lengthWithoutArc * 0.5, oldCenter.Y - radius, 0);
+                Point2 = new Point3d(oldCenter.X + lengthWithoutArc * 0.5, oldCenter.Y + radius, 0);
+
+                Center = new Point3d(point2.X - Length / 2, (point1.Y + point2.Y) * 0.5, 0);
             }
         }
 
@@ -141,11 +168,61 @@ namespace Key_master.Keys
         }
 
 
+        public override hresult PlaceObject(PlaceFlags lInsertType)
+        {
+            InputJig jig = new InputJig();
+            jig.SetInputOptions(InputJig.InputReturnMode.Other);
+            jig.ForceInputNumbers = true;
+
+            InputJig.PropertyInpector.SetSource(this);
+
+
+            if (!jig.GetRealNumber("Длина шпоночного паза: ", out double length))
+                return hresult.e_Abort;
+
+            length = Math.Abs(length);
+
+            if (length == 0)
+                length = 50000;
+
+
+            if (!jig.GetRealNumber("Ширина шпоночного паза: ", out double width))
+                return hresult.e_Abort;
+
+            width = Math.Abs(width);
+
+            if (width == 0)
+                width = 50000;
+
+            DbEntity.AddToCurrentDocument();
+
+            InputResult result = jig.GetPoint("Куда вставить шпоночный паз: ");
+
+            if (result.Result == InputResult.ResultCode.Cancel)
+                return hresult.e_Abort;
+
+            Center = result.Point;
+
+            //Width = width;
+            //Length = length;
+
+            radius = width * 0.5;
+
+            double lengthWithoutArc = Length - radius;
+            Point1 = new Point3d(center.X - lengthWithoutArc * 0.5, center.Y - radius, 0);
+            Point2 = new Point3d(center.X + lengthWithoutArc * 0.5, center.Y + radius, 0);
+
+            center = new Point3d(point2.X - Length / 2, (point1.Y + point2.Y) * 0.5, 0);
+
+            DbEntity.Update();
+
+            return hresult.s_Ok;
+        }
+
+
         public KeyTypeThree()
         {
             KeyType = "3";
         }
-
-
     }
 }

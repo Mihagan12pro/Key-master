@@ -15,7 +15,7 @@ namespace Key_master.Keys
 
 
         [DisplayName("Центр шпоночного паза")]
-        public Point3d Center
+        public virtual Point3d Center
         {
             get => center;
 
