@@ -187,21 +187,26 @@ namespace Key_master.Keys
                 );
 
             info.AppendGrip
-                (
-                    new McSmartGrip<KeyTypeTwo>
-                        (
+                 (
+                     new McSmartGrip<KeyTypeTwo>
+                         (
 
-                            new Point3d(point1.X, center.Y, 0),
+                             new Point3d(point1.X, center.Y, 0),
 
-                            (obj, grip, offset) => {
+                             McBaseGrip.GripAppearance.InsertVertex,
 
-                                obj.Point1 = new Point3d(obj.Point1.X + offset.X, obj.Point1.Y, 0);
+                             1.57,
 
-                            }
-                        
-                        )
+                             "",
 
-                );
+                             (obj, grip, offset) =>
+                             {
+                                 obj.Point1 = new Point3d(obj.Point1.X + offset.X, obj.Point1.Y, 0);
+
+                             }
+
+                         )
+                 );
 
 
             info.AppendGrip
@@ -210,6 +215,12 @@ namespace Key_master.Keys
                         (
 
                             new Point3d(point2.X, center.Y, 0),
+
+                            McBaseGrip.GripAppearance.InsertVertex,
+
+                            1.57,
+
+                             "",
 
                             (obj, grip, offset) => {
 
@@ -228,10 +239,16 @@ namespace Key_master.Keys
 
                             new Point3d(center.X, point1.Y, 0),
 
+                            McBaseGrip.GripAppearance.InsertVertex,
+
+                            0,
+
+                            "",
+
                             (obj, grip, offset) => {
 
                                 obj.Point1 = new Point3d(obj.Point1.X, offset.Y + obj.Point1.Y, 0);
-                            
+
                             }
 
                         )
@@ -246,14 +263,21 @@ namespace Key_master.Keys
 
                             new Point3d(center.X, point2.Y, 0),
 
+                            McBaseGrip.GripAppearance.InsertVertex,
+
+                            0,
+
+                            "",
+
                             (obj, grip, offset) => {
 
                                 obj.Point2 = new Point3d(obj.Point2.X, offset.Y + obj.Point2.Y, 0);
-                            
+
                             }
 
                         )
                 );
+
 
             return true;
         }
