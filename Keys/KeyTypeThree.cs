@@ -1,6 +1,4 @@
-﻿using Multicad;
-using Multicad.CustomObjectBase;
-using Multicad.DatabaseServices;
+﻿using Multicad.CustomObjectBase;
 using Multicad.Geometry;
 using Multicad.Runtime;
 
@@ -33,14 +31,22 @@ namespace Key_master.Keys
         public override Point3d Point1
         {
             get => point1;
-            set => point1 = value;
+            set
+            {
+                point1 = value;
+                Center = new Point3d((point2.X + point1.X) * 0.5, (point1.Y + point2.Y) * 0.5, 0);
+            }
         }
 
 
         public override Point3d Point2
         {
             get => point2;
-            set => point2 = value;
+            set
+            {
+                point2 = value;
+                Center = new Point3d((point2.X + point1.X) * 0.5, (point1.Y + point2.Y) * 0.5, 0);
+            }
         }
 
 
@@ -64,7 +70,7 @@ namespace Key_master.Keys
                 Point1 = new Point3d(oldCenter.X - lengthWithoutArc * 0.5, oldCenter.Y - radius, 0);
                 Point2 = new Point3d(oldCenter.X + lengthWithoutArc * 0.5, oldCenter.Y + radius, 0);
 
-                Center = new Point3d(point2.X - Length / 2, (point1.Y + point2.Y) * 0.5, 0);
+                Center = new Point3d((point2.X + point1.X) * 0.5, (point1.Y + point2.Y) * 0.5, 0);
             }
         }
 
@@ -87,7 +93,7 @@ namespace Key_master.Keys
                 Point1 = new Point3d(oldCenter.X - lengthWithoutArc * 0.5, oldCenter.Y - radius, 0);
                 Point2 = new Point3d(oldCenter.X + lengthWithoutArc * 0.5, oldCenter.Y + radius, 0);
 
-                Center = new Point3d(point2.X - Length / 2, (point1.Y + point2.Y) * 0.5, 0);
+                Center = new Point3d((point2.X + point1.X) * 0.5, (point1.Y + point2.Y) * 0.5, 0);
             }
         }
 
@@ -156,8 +162,10 @@ namespace Key_master.Keys
 
                            (obj, grip, offset) =>
                            {
-
-                               obj.Point2 += offset;
+                               if (TryModify())
+                               {
+                                   obj.Point2 += offset;
+                               }
 
                            }
                        )
@@ -172,11 +180,62 @@ namespace Key_master.Keys
                            (obj, grip, offset) =>
                            {
 
-                               obj.Point1 += offset;
+                               if (TryModify())
+                               {
+                                   obj.Point1 += offset;
+                               }
 
                            }
                        )
                );
+
+            //info.AppendGrip
+            //    (
+            //        new McSmartGrip<KeyTypeThree>
+            //            (
+
+            //                new Point3d(point2.X, point1.Y, 0),
+
+            //                (obj, grip, offset) => {
+
+            //                    if (TryModify())
+            //                    {
+            //                        obj.Point1 = new Point3d(obj.Point1.X, obj.Point1.Y + offset.Y, 0);
+            //                        obj.Point2 = new Point3d(obj.Point2.X + offset.X, obj.Point2.Y, 0);
+            //                    }
+
+            //                }
+
+            //            )
+
+            //    );
+
+            info.AppendGrip
+                (
+                    new McSmartGrip<KeyTypeThree>
+                        (
+
+                            new Point3d(point2.X, center.Y, 0),
+
+                            McBaseGrip.GripAppearance.InsertVertex,
+
+                            1.57,
+
+                             "",
+
+                            (obj, grip, offset) =>
+                            {
+
+                                if (TryModify())
+                                {
+                                    obj.Point2 = new Point3d(obj.Point2.X + offset.X, obj.Point2.Y, 0);
+                                }
+
+                            }
+
+                        )
+                        
+                );
 
             return true;
         }
@@ -191,8 +250,6 @@ namespace Key_master.Keys
             double lengthWithoutArc = length - radius;
             point1 = new Point3d(center.X - lengthWithoutArc * 0.5, center.Y - radius, 0);
             point2 = new Point3d(center.X + lengthWithoutArc * 0.5, center.Y + radius, 0);
-
-            //Width = width;
             
             DbEntity.Update();
         }

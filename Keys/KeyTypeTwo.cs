@@ -1,5 +1,4 @@
-﻿using Multicad;
-using Multicad.CustomObjectBase;
+﻿using Multicad.CustomObjectBase;
 using Multicad.Geometry;
 using Multicad.Runtime;
 
