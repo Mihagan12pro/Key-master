@@ -148,7 +148,6 @@ namespace Key_master.Keys
 
                                obj.Point1 += offset;
                                obj.Point2 += offset;
-                               obj.Center += offset;
 
                            }
                        )
@@ -189,26 +188,27 @@ namespace Key_master.Keys
                        )
                );
 
-            //info.AppendGrip
-            //    (
-            //        new McSmartGrip<KeyTypeThree>
-            //            (
+            info.AppendGrip
+                (
+                    new McSmartGrip<KeyTypeThree>
+                        (
 
-            //                new Point3d(point2.X, point1.Y, 0),
+                            new Point3d(point2.X, point1.Y, 0),
 
-            //                (obj, grip, offset) => {
+                            (obj, grip, offset) =>
+                            {
 
-            //                    if (TryModify())
-            //                    {
-            //                        obj.Point1 = new Point3d(obj.Point1.X, obj.Point1.Y + offset.Y, 0);
-            //                        obj.Point2 = new Point3d(obj.Point2.X + offset.X, obj.Point2.Y, 0);
-            //                    }
+                                if (TryModify())
+                                {
+                                    obj.Point1 = new Point3d(obj.Point1.X, obj.Point1.Y + offset.Y, 0);
+                                    obj.Point2 = new Point3d(obj.Point2.X + offset.X, obj.Point2.Y, 0);
+                                }
 
-            //                }
+                            }
 
-            //            )
+                        )
 
-            //    );
+                );
 
             info.AppendGrip
                 (

@@ -9,7 +9,7 @@ namespace Key_master
 {
     internal static class Library
     {
-        [CommandMethod("KM_create_key", CommandFlags.NoCheck | CommandFlags.NoPrefix)]
+        [CommandMethod("","KM_create_key",CommandFlags.NoCheck | CommandFlags.NoPrefix)]
         public static void CreateKeyCommand()
         {
             InputJig input = new InputJig();
@@ -42,6 +42,24 @@ namespace Key_master
                     key = new KeyTypeThree();
                     break;
             }
+
+            key.PlaceObject();
+        }
+
+
+        [CommandMethod("KM_key_2", CommandFlags.NoCheck | CommandFlags.NoPrefix)]
+        public static void CreateKeyTypeTwoCommand()
+        {
+            KeyTypeTwo key = new KeyTypeTwo();
+
+            key.PlaceObject();
+        }
+
+
+        [CommandMethod("KM_key_3", CommandFlags.NoCheck | CommandFlags.NoPrefix)]
+        public static void CreateKeyTypeThreeCommand()
+        {
+            KeyTypeThree key = new KeyTypeThree();
 
             key.PlaceObject();
         }
