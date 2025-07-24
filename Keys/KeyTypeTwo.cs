@@ -278,6 +278,29 @@ namespace Key_master.Keys
                         )
                 );
 
+            info.AppendGrip
+                (
+                    new McSmartGrip<KeyTypeTwo>
+                        (
+
+                            new Point3d(center.X, point1.Y, 0),
+
+                            McBaseGrip.GripAppearance.InsertVertex,
+
+                            0,
+
+                            "",
+
+                            (obj, grip, offset) => {
+
+                                obj.Point1 = new Point3d(obj.Point1.X, offset.Y + obj.Point1.Y, 0);
+
+                            }
+
+                        )
+
+                );
+
 
             return true;
         }

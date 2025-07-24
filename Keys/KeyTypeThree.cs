@@ -1,4 +1,5 @@
-﻿using Multicad.CustomObjectBase;
+﻿using Multicad;
+using Multicad.CustomObjectBase;
 using Multicad.Geometry;
 using Multicad.Runtime;
 
@@ -9,6 +10,21 @@ namespace Key_master.Keys
     {
         protected double radius;
 
+        protected Point3d arc1MiddlePoint;
+        public Point3d Arc1MiddlePoint
+        {
+            get
+            {
+                return arc1MiddlePoint;
+            }
+            set
+            {
+                if (TryModify())
+                {
+                    arc1MiddlePoint = value;
+                }
+            }
+        }
 
         public override Point3d Center
         {
@@ -23,6 +39,8 @@ namespace Key_master.Keys
                     center = value;
 
                     radius = Width / 2;
+
+                    arc1MiddlePoint = new Point3d((point1.X < point2.X ? point1.X - radius : point1.X + radius), center.Y, 0);
                 }
             }
         }
@@ -120,6 +138,7 @@ namespace Key_master.Keys
             Point3d arcCenter = new Point3d(point1.X, center.Y, 0);
             double startAngle, endAngle;
 
+
             if (point1.X < point2.X)
             {
                 startAngle = 1.57;
@@ -132,6 +151,36 @@ namespace Key_master.Keys
             }
 
             dc.DrawArc(arcCenter, radius, startAngle, endAngle);
+
+            Arc1MiddlePoint = new Point3d((point1.X < point2.X ? point1.X - radius : point1.X + radius), center.Y, 0);
+        }
+
+
+
+        public override hresult OnMcSerialization(McSerializationInfo info)
+        {
+            info.Add(nameof(arc1MiddlePoint), arc1MiddlePoint);
+
+            return base.OnMcSerialization(info);
+        }
+
+
+        public override hresult OnMcDeserialization(McSerializationInfo info)
+        {
+            if (!info.GetValue(nameof(arc1MiddlePoint), out arc1MiddlePoint))
+            {
+                return hresult.e_Fail;
+            }
+
+            return base.OnMcDeserialization(info);
+        }
+
+
+        public override void OnTransform(Matrix3d tfm)
+        {
+            base.OnTransform(tfm);
+
+            Arc1MiddlePoint = arc1MiddlePoint.TransformBy(tfm);
         }
 
 
@@ -139,6 +188,7 @@ namespace Key_master.Keys
         {
             info.AppendGrip
                (
+
                    new McSmartGrip<KeyTypeThree>
                        (
                            center,
@@ -155,6 +205,7 @@ namespace Key_master.Keys
 
             info.AppendGrip
                (
+
                    new McSmartGrip<KeyTypeThree>
                        (
                            point2,
@@ -172,6 +223,7 @@ namespace Key_master.Keys
 
             info.AppendGrip
                (
+
                    new McSmartGrip<KeyTypeThree>
                        (
                            point1,
@@ -190,6 +242,7 @@ namespace Key_master.Keys
 
             info.AppendGrip
                 (
+
                     new McSmartGrip<KeyTypeThree>
                         (
 
@@ -212,6 +265,77 @@ namespace Key_master.Keys
 
             info.AppendGrip
                 (
+
+                    new McSmartGrip<KeyTypeThree>
+                        (
+
+                            new Point3d(center.X, point2.Y, 0),
+
+                            McBaseGrip.GripAppearance.InsertVertex,
+
+                            0,
+
+                            "",
+
+                            (obj, grip, offset) =>
+                            {
+
+                                obj.Point2 = new Point3d(obj.Point2.X, offset.Y + obj.Point2.Y, 0);
+
+                            }
+
+                        )
+
+                );
+
+            info.AppendGrip
+              (
+
+                  new McSmartGrip<KeyTypeThree>
+                      (
+
+                          new Point3d(center.X, point1.Y, 0),
+
+                          McBaseGrip.GripAppearance.InsertVertex,
+
+                          0,
+
+                          "",
+
+                          (obj, grip, offset) =>
+                          {
+
+                              obj.Point1 = new Point3d(obj.Point1.X, offset.Y + obj.Point1.Y, 0);
+
+                          }
+
+                      )
+
+              );
+
+
+            info.AppendGrip
+               (
+                   new McSmartGrip<KeyTypeThree>
+                       (
+
+                           new Point3d(point1.X, point2.Y, 0),
+
+
+                           (obj, grip, offset) => {
+
+                               obj.Point1 = new Point3d(obj.Point1.X + offset.X, obj.Point1.Y, 0);
+                               obj.Point2 = new Point3d(obj.Point2.X, obj.Point2.Y + offset.Y, 0);
+
+                           }
+
+                       )
+
+               );
+
+            info.AppendGrip
+                (
+
                     new McSmartGrip<KeyTypeThree>
                         (
 
@@ -234,7 +358,36 @@ namespace Key_master.Keys
                             }
 
                         )
-                        
+
+                );
+
+
+            info.AppendGrip
+                (
+
+                    new McSmartGrip<KeyTypeThree>
+                        (
+
+                            arc1MiddlePoint,
+
+                            McBaseGrip.GripAppearance.InsertVertex,
+
+                            1.57,
+
+                             "",
+
+                            (obj, grip, offset) =>
+                            {
+
+                                if (TryModify())
+                                {
+                                    obj.Point1 = new Point3d(obj.Point1.X + offset.X, obj.Point1.Y, 0);
+                                }
+
+                            }
+
+                        )
+
                 );
 
             return true;
